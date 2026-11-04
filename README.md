@@ -53,16 +53,18 @@ Payment status is separate from order status. One order may have multiple paymen
 
 ## Database Design
 
-The planned database has six main tables:
+The database contains eight tables:
 
 | Table | Purpose |
 |---|---|
 | `users` | Administrator and customer accounts |
+| `addresses` | Saved customer delivery addresses |
 | `categories` | Product categories |
 | `products` | Flower product details, prices, images, and stock |
 | `orders` | Customer and delivery information for orders |
 | `order_items` | Items and price/name snapshots for each order |
 | `payments` | Payment method, transaction reference, amount, and status |
+| `order_status_history` | Order status changes and the administrator who made them |
 
 ### Relationships
 - One user can place many orders.
@@ -172,11 +174,29 @@ Use your own local credentials. Do not commit real credentials to Git.
 
 ### 6. Configure the web server
 
-Configure Lerd or Apache to use the project's `public/` directory as its document root. Enable URL rewriting so requests are handled by `public/index.php`.
+For the storefront and admin pages, configure Lerd or Apache to use the project root as its document root. The root `index.php` serves the flower shop; admin sign-in is available at `/admin/login.php`. When the planned `public/` front controller is added, update the document root to `public/`.
 
 ### 7. Run the project
 
 Open the local domain configured in your development environment.
+
+## Admin Sign-in
+
+The admin area uses the `users` table from `bloom_basket_database.sql`. Import the SQL file, configure the database connection with the `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` environment variables, then set a real password for the seeded administrator from a terminal:
+
+```bash
+php scripts/set_admin_password.php admin@bloombasket.com
+```
+
+The script only runs from the command line, requires a password of at least 12 characters, and updates the password only when the matching database account already has the `admin` role. The SQL seed's `CHANGE_ME` value is a placeholder and cannot be used to sign in.
+
+Visit `/admin/login.php` to sign in. The admin dashboard is `/admin/`; signing out uses a CSRF-protected POST form. The dashboard reads product, category, and order totals directly from the imported database. Product, category, order, and payment management links remain visibly marked as coming soon until those pages are implemented.
+
+## Customer Storefront
+
+The root `/` displays active, in-stock flowers and categories from MySQL. Customers can search and filter the catalog, view product details, keep a session-based basket, create a customer account, and sign in to place orders and review their order history. Customer accounts use the `customer` role and hashed passwords; the SQL seed's `CHANGE_ME` customer passwords are placeholders, so register an account or set a real password before signing in.
+
+Checkout uses a flat ৳80 delivery fee and supports Cash on Delivery plus simulated bKash, Nagad, and Rocket results for this demo. No payment gateway is connected, and payment PINs and OTPs are never requested. Orders, price snapshots, stock deductions, payment records, and the initial status-history entry are saved in one PDO transaction.
 
 ## Security Considerations
 
