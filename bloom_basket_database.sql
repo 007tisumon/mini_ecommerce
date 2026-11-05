@@ -38,10 +38,7 @@ CREATE TABLE addresses (
  city VARCHAR(100) NOT NULL,
  postal_code VARCHAR(20),
  is_default BOOLEAN NOT NULL DEFAULT FALSE,
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- CONSTRAINT fk_addresses_user FOREIGN KEY (user_id)
- REFERENCES users(id) ON DELETE CASCADE,
- INDEX idx_addresses_user (user_id)
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE categories (
@@ -66,12 +63,8 @@ CREATE TABLE products (
  is_active BOOLEAN NOT NULL DEFAULT TRUE,
  is_featured BOOLEAN NOT NULL DEFAULT FALSE,
  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- CONSTRAINT fk_products_category FOREIGN KEY (category_id)
- REFERENCES categories(id) ON DELETE RESTRICT,
- INDEX idx_products_name (name),
- INDEX idx_products_category (category_id),
- INDEX idx_products_active (is_active)
+ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
 ) ENGINE=InnoDB;
 
 CREATE TABLE orders (
@@ -90,12 +83,7 @@ CREATE TABLE orders (
  status ENUM('pending','confirmed','processing','shipped','delivered','cancelled')
  NOT NULL DEFAULT 'pending',
  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- CONSTRAINT fk_orders_user FOREIGN KEY (user_id)
- REFERENCES users(id) ON DELETE RESTRICT,
- INDEX idx_orders_status (status),
- INDEX idx_orders_created (created_at),
- INDEX idx_orders_user (user_id)
+ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE order_items (
@@ -105,12 +93,7 @@ CREATE TABLE order_items (
  product_name VARCHAR(150) NOT NULL,
  unit_price DECIMAL(10,2) NOT NULL,
  quantity INT UNSIGNED NOT NULL,
- line_total DECIMAL(10,2) NOT NULL,
- CONSTRAINT fk_order_items_order FOREIGN KEY (order_id)
- REFERENCES orders(id) ON DELETE CASCADE,
- CONSTRAINT fk_order_items_product FOREIGN KEY (product_id)
- REFERENCES products(id) ON DELETE SET NULL,
- INDEX idx_order_items_order (order_id)
+ line_total DECIMAL(10,2) NOT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE payments (
@@ -121,11 +104,7 @@ CREATE TABLE payments (
  amount DECIMAL(10,2) NOT NULL,
  status ENUM('pending','success','failed') NOT NULL DEFAULT 'pending',
  paid_at DATETIME NULL,
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- CONSTRAINT fk_payments_order FOREIGN KEY (order_id)
- REFERENCES orders(id) ON DELETE RESTRICT,
- INDEX idx_payments_order (order_id),
- INDEX idx_payments_status (status)
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE order_status_history (
@@ -135,12 +114,7 @@ CREATE TABLE order_status_history (
  old_status VARCHAR(30) NULL,
  new_status VARCHAR(30) NOT NULL,
  note TEXT,
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- CONSTRAINT fk_history_order FOREIGN KEY (order_id)
- REFERENCES orders(id) ON DELETE CASCADE,
- CONSTRAINT fk_history_user FOREIGN KEY (changed_by)
- REFERENCES users(id) ON DELETE SET NULL,
- INDEX idx_history_order (order_id)
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- DUMMY DATA
