@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="760" viewBox="0 0 640 760" fill="none">
+  <rect width="640" height="760" fill="#F2F1E9"/>
+  <circle cx="320" cy="324" r="205" fill="#E8ECDD"/>
+  <circle cx="320" cy="324" r="166" fill="#F3E9E1"/>
+  <g fill="#D9B7A2">
+    <ellipse cx="320" cy="255" rx="45" ry="76"/>
+    <ellipse cx="320" cy="393" rx="45" ry="76"/>
+    <ellipse cx="251" cy="324" rx="76" ry="45"/>
+    <ellipse cx="389" cy="324" rx="76" ry="45"/>
+    <ellipse cx="271" cy="275" rx="43" ry="73" transform="rotate(-45 271 275)"/>
+    <ellipse cx="369" cy="373" rx="43" ry="73" transform="rotate(-45 369 373)"/>
+    <ellipse cx="369" cy="275" rx="43" ry="73" transform="rotate(45 369 275)"/>
+    <ellipse cx="271" cy="373" rx="43" ry="73" transform="rotate(45 271 373)"/>
+  </g>
+  <circle cx="320" cy="324" r="36" fill="#D6BD50"/>
+  <path d="M321 361c-8 94 13 142 30 190" stroke="#68896D" stroke-linecap="round" stroke-width="9"/>
+  <path d="M327 452c-55-41-91-30-104-5 39 35 73 38 104 5Z" fill="#9CAF87"/>
+  <path d="M342 497c36-38 70-41 93-20-24 42-55 53-93 20Z" fill="#7E9B77"/>
+  <text x="320" y="648" fill="#617665" font-family="Georgia,serif" font-size="26" text-anchor="middle" letter-spacing="3">A LITTLE SOMETHING LOVELY</text>
+</svg>
