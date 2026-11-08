@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if (isset($_FILES['image']) && !empty($_FILES['image'])) {
         $img = $_FILES['image'];
         
-        $upload_dir = 'uploads/';
+        $upload_dir = 'assets/images/products/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
