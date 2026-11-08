@@ -42,87 +42,114 @@ require  'partials/header.php';
                 <h5 class="card-title">Add New Product</h5>
                 <hr />
                 <div class="form-body mt-4">
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <div class="border border-3 p-4 rounded">
-                                <div class="mb-3">
-                                    <label for="inputProductTitle" class="form-label">Product Title</label>
-                                    <input type="email" class="form-control" id="inputProductTitle" placeholder="Enter product title">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="inputProductDescription" class="form-label">Description</label>
-                                    <textarea class="form-control" id="inputProductDescription" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="inputProductDescription" class="form-label">Product Images</label>
-                                    <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+                    <?php
+
+
+                    $id = $_GET['id'];
+
+                    $result = $conn->query("SELECT * FROM products WHERE id='$id'");
+
+                    $product = $result->fetch_assoc();
+
+
+                    ?>
+                    <form action="create.php" method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="border border-3 p-4 rounded">
+                                    <div class="mb-3">
+                                        <label for="inputProductTitle" class="form-label">Product Title</label>
+                                        <input type="text" name="name" class="form-control" id="inputProductTitle" placeholder="Enter product title"
+                                        value="<?php echo $product['name'] ?>"
+                                        >
+                                        
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="inputProductDescription" class="form-label">Description</label>
+                                        <textarea name="description" class="form-control" id="inputProductDescription" placeholder="Example........." rows="3">
+                                            <?php echo $product['description'] ?>
+                                        </textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="inputProductDescription" class="form-label">Product Images</label>
+                                        <input name="image" type="file" accept="image/*" >
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="border border-3 p-4 rounded">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="inputPrice" class="form-label">Price</label>
-                                        <input type="number" class="form-control" id="inputPrice" placeholder="00.00">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="inputCompareatprice" class="form-label">Stock</label>
-                                        <input type="number" class="form-control" id="inputCompareatprice" placeholder="00.00">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="inputCostPerPrice" class="form-label">Slug</label>
-                                        <input type="text" class="form-control" id="inputCostPerPrice" placeholder="00.00">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="inputStarPoints" class="form-label">SKU</label>
-                                        <input type="text" class="form-control" id="inputStarPoints" placeholder="00.00">
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="inputProductType" class="form-label">Category</label>
-                                        <select class="form-select" id="inputProductType">
-                                            <option selected disabled>Select One</option>
-                                            <?php $categories = $conn->query("SELECT * FROM categories");
-                                            while ($ctg = $categories->fetch_assoc()) { ?>
-                                                <option value='<?php echo $ctg['id']  ?>'><?php echo $ctg['name']; ?></option>";
-                                            <?php } ?>
+                            <div class="col-lg-4">
+                                <div class="border border-3 p-4 rounded">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="inputPrice" class="form-label">Price</label>
+                                            <input name="price" type="text" class="form-control"
+                                            value="<?php echo $product['price'] ?>"
+                                            id="inputPrice" placeholder="price">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputCompareatprice" class="form-label">Stock</label>
+                                            <input name="stock" type="number" class="form-control" id="inputCompareatprice" 
+                                            value="<?php echo $product['stock'] ?>"
+                                            placeholder="stock">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputCostPerPrice" class="form-label">Slug</label>
+                                            <input name="slug" type="text" class="form-control" id="inputCostPerPrice" 
+                                            value="<?php echo $product['slug'] ?>"
+                                            placeholder="Slug">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputStarPoints" class="form-label">SKU</label>
+                                            <input name="sku" type="text" class="form-control" 
+                                            value="<?php echo $product['sku'] ?>"
+                                            id="inputStarPoints" placeholder="SKU">
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="inputProductType" class="form-label">Category</label>
+                                            <select name="categories" class="form-select" id="inputProductType">
+                                                <option selected disabled>Select One</option>
+                                                <?php
+                                                $categories = $conn->query("SELECT * FROM categories");
+                                                while ($ctg = $categories->fetch_assoc()) {
+                                                ?>
+                                                    <option value="<?php echo $ctg['id']; ?>">
+                                                        <?php echo $ctg['name']; ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="inputVendor" class="form-label">Featured</label>
+                                            <select name="featured" class="form-select" id="inputVendor">
 
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="inputVendor" class="form-label">Featured</label>
-                                        <select class="form-select" id="inputVendor">
+                                                <option selected value="1">YES</option>
+                                                <option value="0">No</option>
 
-                                            <option selected value="1">YES</option>
-                                            <option value="0">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="inputCollection" class="form-label">Active</label>
+                                            <select name="active" class="form-select" id="inputCollection">
 
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="inputCollection" class="form-label">Collection</label>
-                                        <select class="form-select" id="inputCollection">
+                                                <option selected value="1">YES</option>
+                                                <option value="0">No</option>
 
 
-                                            <option>Select One</option>
-                                            <option value="1">One</option>
-                                            <option value="2">Two</option>
-                                            <option value="3">Three</option>
-
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
+                                            </select>
+                                        </div>
+                                        <!-- <div class="col-12">
                                         <label for="inputProductTags" class="form-label">Product Tags</label>
                                         <input type="text" class="form-control" id="inputProductTags" placeholder="Enter Product Tags">
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="d-grid">
-                                            <button type="button" class="btn btn-light">Save Product</button>
+                                    </div> -->
+                                        <div class="col-12">
+                                            <div class="d-grid">
+                                                <input type="submit" value="Save Product" class="btn btn-light">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div><!--end row-->
+                        </div><!--end row-->
+                    </form>
                 </div>
             </div>
         </div>

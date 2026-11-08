@@ -89,29 +89,34 @@ require "partials/header.php";
 
 
                 <div class="col">
-                    <div class="card">
-                        <img src="assets/images/products/01.png" class="card-img-top" alt="...">
-                        <div class="">
-                            <div class="position-absolute top-0 end-0 m-3 product-discount"><span class="">-10%</span></div>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title cursor-pointer"><?php echo $product['name'] ?></h6>
-                            <div class="clearfix">
-                                <p class="mb-0 float-start"><strong>134</strong> Sales</p>
-                                <p class="mb-0 float-end fw-bold"><span class="me-2 text-decoration-line-through">$350</span><span class="text-white">$240</span></p>
+                    <a href="update_product.php?id=<?php echo $product['id'] ?>">
+                        <div class="card">
+                            <img src="assets/images/products/flower.webp" class="card-img-top" alt="...">
+                            <div class="">
+                                <div class="position-absolute top-0 end-0 m-3 product-discount"><span class="">-10%</span></div>
                             </div>
-                            <div class="d-flex align-items-center mt-3 fs-6">
-                                <div class="cursor-pointer">
-                                    <i class='bx bxs-star text-white'></i>
-                                    <i class='bx bxs-star text-white'></i>
-                                    <i class='bx bxs-star text-white'></i>
-                                    <i class='bx bxs-star text-light-4'></i>
-                                    <i class='bx bxs-star text-light-4'></i>
+                            <div class="card-body">
+                                <h6 class="card-title cursor-pointer"><?php echo $product['name'] ?></h6>
+                                <div class="clearfix">
+                                    <p class="mb-0 float-start"><strong>134</strong> Sales</p>
+                                    <p class="mb-0 float-end fw-bold">
+                                        <!-- <span class="me-2 text-decoration-line-through">$350</span> -->
+                                        <span class="text-white">tk <?php echo $product['price'] ?></span>
+                                    </p>
                                 </div>
-                                <p class="mb-0 ms-auto">4.2(182)</p>
+                                <div class="d-flex align-items-center mt-3 fs-6">
+                                    <div class="cursor-pointer">
+                                        <i class='bx bxs-star text-white'></i>
+                                        <i class='bx bxs-star text-white'></i>
+                                        <i class='bx bxs-star text-white'></i>
+                                        <i class='bx bxs-star text-light-4'></i>
+                                        <i class='bx bxs-star text-light-4'></i>
+                                    </div>
+                                    <p class="mb-0 ms-auto">4.2(182)</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                 </div>
             <?php } ?>
