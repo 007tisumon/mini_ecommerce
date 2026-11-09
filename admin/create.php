@@ -7,6 +7,7 @@ require "../database/config.php";
 // echo $_POST['name'];
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    // echo 'submit';
     // echo $_POST['name'];
     // echo "desc". $_POST['description'];
     // echo "price" .$_POST['price'];
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // var_dump($_FILES['image']); 
 
     $errors = [];
+    // var_dump($errors);
     $name        = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $price       = floatval($_POST['price'] ?? 0);
@@ -71,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         if(move_uploaded_file($img['tmp_name'], $dest_path)){
             $image_path = $dest_path;
         }else {
+            echo 'image upload error';
             $errors[] = "Failed to upload image: {$img['name']}";
         }
 
@@ -80,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     if(empty($errors)){
 
-        $sql = "INSERT INTO products (id, name, description, price, stock, slug, sku, category_id, is_featured, is_active, image_path) 
+       echo $sql = "INSERT INTO products (id, name, description, price, stock, slug, sku, category_id, is_featured, is_active, image_path) 
                     VALUES (null, '$name', '$description', '$price', '$stock', '$slug', '$sku', '$category_id', '$featured', '$active', '$image_path')";
 
         $result =  $conn->query($sql);
@@ -90,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             header("Location: admin_products.php");
             exit;
         } else {
+            // var_dump($errors);
             $errors[] = "Database insertion failed: " . $conn->error;
         }
         

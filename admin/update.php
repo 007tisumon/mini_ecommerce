@@ -10,7 +10,6 @@ require "../database/config.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     echo 'post'. $_POST['id'];
-    echo 'get' . $_GET['id'];
 //     // echo $_POST['name'];
 //     // echo "desc". $_POST['description'];
 //     // echo "price" .$_POST['price'];

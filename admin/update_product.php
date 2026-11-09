@@ -59,6 +59,7 @@ if (!$product) {
                     <div class="form-body mt-4">
 
                         <form action="update.php" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="id" value="<?php echo $product['id'];  ?>">
                             <div class="row">
                                 <div class="col-lg-8">
                                     <div class="border border-3 p-4 rounded">

@@ -56,7 +56,7 @@ require  'partials/header.php';
                                     </div>
                                     <div class="mb-3">
                                         <label for="inputProductDescription" class="form-label">Product Images</label>
-                                        <input  name="image" type="file" accept="image/*">
+                                        <input name="image" type="file" accept="image/*">
                                     </div>
                                 </div>
                             </div>
@@ -65,19 +65,19 @@ require  'partials/header.php';
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label for="inputPrice" class="form-label">Price</label>
-                                            <input name="price" type="number" class="form-control" id="inputPrice" placeholder="00.00">
+                                            <input name="price" type="text" class="form-control" id="inputPrice" placeholder="Price">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputCompareatprice" class="form-label">Stock</label>
-                                            <input name="stock" type="number" class="form-control" id="inputCompareatprice" placeholder="00.00">
+                                            <input name="stock" type="number" class="form-control" id="inputCompareatprice" placeholder="Stock">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputCostPerPrice" class="form-label">Slug</label>
-                                            <input name="slug" type="text" class="form-control" id="inputCostPerPrice" placeholder="00.00">
+                                            <input name="slug" type="text" class="form-control" id="inputCostPerPrice" placeholder="Slug">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputStarPoints" class="form-label">SKU</label>
-                                            <input name="sku" type="text" class="form-control" id="inputStarPoints" placeholder="00.00">
+                                            <input name="sku" type="text" class="form-control" id="inputStarPoints" placeholder="Unique SKU">
                                         </div>
                                         <div class="col-12">
                                             <label for="inputProductType" class="form-label">Category</label>

@@ -91,7 +91,7 @@ require "partials/header.php";
                 <div class="col">
                     <a href="update_product.php?id=<?php echo $product['id'] ?>">
                         <div class="card">
-                            <img src="assets/images/products/flower.webp" class="card-img-top" alt="...">
+                            <img src="<?php echo isset($product['image_path']) ? $product['image_path'] : 'assets/images/products/flower.webp' ?>" class="card-img-top" alt="...">
                             <div class="">
                                 <div class="position-absolute top-0 end-0 m-3 product-discount"><span class="">-10%</span></div>
                             </div>
