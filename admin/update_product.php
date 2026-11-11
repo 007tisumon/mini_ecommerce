@@ -71,9 +71,8 @@ if (!$product) {
                                         </div>
                                         <div class="mb-3">
                                             <label for="inputProductDescription" class="form-label">Description</label>
-                                            <textarea name="description" class="form-control" id="inputProductDescription" placeholder="Example........." rows="3">
-                                            <?php echo $product['description'] 
-                                            ?>
+                                            <textarea name="description" class="form-control" id="inputProductDescription" placeholder="Example.." rows="3">
+                                            <?php echo $product['description'] ?>
                                         </textarea>
                                         </div>
                                         <div class="mb-3">
@@ -145,11 +144,20 @@ if (!$product) {
                                             <!-- <div class="col-12">
                                         <label for="inputProductTags" class="form-label">Product Tags</label>
                                         <input type="text" class="form-control" id="inputProductTags" placeholder="Enter Product Tags">
-                                    </div> -->
+                                          </div> -->
                                             <div class="col-12">
-                                                <div class="d-grid">
-                                                    <input type="submit" value="Save Product" class="btn btn-light">
+                                                <div class="row">
+                                                    <div class="d-grid col-6">
+                                                        <button type="button" class="btn btn-danger"> Delete </button>
+
+                                                    </div>
+                                                    <div class="d-grid col-6">
+                                                        <input type="submit" value="Update Product" class="btn btn-light">
+
+                                                    </div>
                                                 </div>
+
+
                                             </div>
                                         </div>
                                     </div>
