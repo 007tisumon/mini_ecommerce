@@ -145,10 +145,26 @@ if (!$product) {
                                         <label for="inputProductTags" class="form-label">Product Tags</label>
                                         <input type="text" class="form-control" id="inputProductTags" placeholder="Enter Product Tags">
                                           </div> -->
+                                            <?php
+
+
+                                            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+                                                if (isset($_POST['delete_btn'])) {
+
+                                                    echo "delete";
+                                                    header('Location: admin_products.php');
+                                                }
+                                            }
+
+
+                                            ?>
                                             <div class="col-12">
                                                 <div class="row">
                                                     <div class="d-grid col-6">
-                                                        <button type="button" class="btn btn-danger"> Delete </button>
+                                                        <button type="button"
+                                                            id="1"
+                                                            class="btn btn-danger delete_btn"> Delete </button>
 
                                                     </div>
                                                     <div class="d-grid col-6">
@@ -177,5 +193,15 @@ if (!$product) {
 require 'partials/footer.php';
 require   'partials/scripts.php';
 
-
 ?>
+
+<script>
+    $(document).ready(function() {
+        $('.delete_btn').click(function(){
+            $.get('delete-product.php',{id:this.id},function(data,status){
+                alert(data)
+            })
+           
+        })
+    });
+</script>
