@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     if(empty($errors)){
 
-       echo $sql = "INSERT INTO products (id, name, description, price, stock, slug, sku, category_id, is_featured, is_active, image_path) 
+       $sql = "INSERT INTO products (id, name, description, price, stock, slug, sku, category_id, is_featured, is_active, image_path) 
                     VALUES (null, '$name', '$description', '$price', '$stock', '$slug', '$sku', '$category_id', '$featured', '$active', '$image_path')";
 
         $result =  $conn->query($sql);
