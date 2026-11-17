@@ -25,6 +25,7 @@
         <span>Fresh blooms, happy hearts <i>✿</i></span>
     </div>
 </footer>
+<script src="<?= h(app_url('admin/assets/js/jquery.min.js')) ?>" defer></script>
 <script src="<?= h(app_url('assets/js/store.js')) ?>" defer></script>
 </body>
 </html>

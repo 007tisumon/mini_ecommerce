@@ -60,9 +60,7 @@ declare(strict_types=1);
             <div class="summary-payments">
                 <span>PAY YOUR WAY</span>
                 <strong>Cash on delivery</strong>
-                <strong>bKash <i>SIMULATED</i></strong>
-                <strong>Nagad <i>SIMULATED</i></strong>
-                <strong>Rocket <i>SIMULATED</i></strong>
+                <strong>bKash <i>DEMO</i></strong>
             </div>
         </aside>
     </div>

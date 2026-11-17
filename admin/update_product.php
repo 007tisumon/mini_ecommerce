@@ -75,7 +75,7 @@ require 'partials/header.php';
 
                     <div id="update-feedback" class="alert d-none" role="alert" aria-live="polite"></div>
                     <form id="update-product-form" action="update.php" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="id" value="<?php echo (int) $product['id']; ?>">
+                        <input type="hidden" name="id" value="<?php echo $product['id']; ?>">
                         <div class="row g-4">
                             <div class="col-lg-8">
                                 <div class="border p-4 rounded h-100">
@@ -110,13 +110,13 @@ require 'partials/header.php';
                                             <label for="product-price" class="form-label">Price</label>
                                             <input name="price" type="number" min="0.01" max="99999999.99" step="0.01"
                                                 class="form-control" id="product-price"
-                                                value="<?php echo htmlspecialchars((string) $product['price'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                                value="<?php echo htmlspecialchars( $product['price'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="product-stock" class="form-label">Stock</label>
                                             <input name="stock" type="number" min="0" step="1"
                                                 class="form-control" id="product-stock"
-                                                value="<?php echo (int) $product['stock']; ?>" required>
+                                                value="<?php echo $product['stock']; ?>" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="product-slug" class="form-label">Slug</label>
@@ -182,11 +182,11 @@ require 'partials/scripts.php';
 ?>
 <script>
     $(function () {
-        var $form = $('#update-product-form');
-        var $feedback = $('#update-feedback');
-        var $saveButton = $('#save-product');
-        var slugEdited = false;
-        var previewUrl = null;
+        let $form = $('#update-product-form');
+        let $feedback = $('#update-feedback');
+        let $saveButton = $('#save-product');
+        let slugEdited = false;
+        let previewUrl = null;
 
         $('#product-slug').on('input', function () {
             slugEdited = true;

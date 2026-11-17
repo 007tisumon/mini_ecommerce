@@ -151,7 +151,7 @@ require   'partials/scripts.php';
 
         $form.on("submit", function(event) {
             event.preventDefault();
-            $message.addClass("d-none").removeClass("alert-danger alert-success").text("");
+            $message.addClass("d-none").removeClass("alert-danger alert-success alert-warning").text("");
             $button.prop("disabled", true).val("Saving...");
 
             $.ajax({
@@ -172,11 +172,19 @@ require   'partials/scripts.php';
                 $button.prop("disabled", false).val("Save Product");
             }).fail(function(xhr, textStatus) {
                 const response = xhr.responseJSON || {};
+                if (textStatus === "parsererror" && xhr.status === 200) {
+                    $message.removeClass("d-none").addClass("alert-warning")
+                        .text("The product may have been saved, but the server response could not be read. Check the product list before trying again.");
+                    $("<a>").attr("href", "admin_products.php").text("Open product list")
+                        .appendTo($message.append(" "));
+                    $button.prop("disabled", true);
+                    return;
+                }
+
                 const message = response.message || (textStatus === "parsererror"
-                    ? "The server returned an invalid response. Check the product list before resubmitting."
+                    ? "The server returned an invalid response."
                     : `Product save request failed (HTTP ${xhr.status}). Please try again.`);
-                $message.removeClass("d-none").addClass("alert-danger")
-                    .text(message);
+                $message.removeClass("d-none").addClass("alert-danger").text(message);
                 $button.prop("disabled", false).val("Save Product");
             });
         });

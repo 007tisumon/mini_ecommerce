@@ -5,7 +5,6 @@
     <!-- Required meta tags -->
     <!-- <base href="admin/"> -->
     <meta charset="utf-8">
-    <base>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--favicon-->
     <link rel="icon" href="assets/images/favicon-32x32.png" type="image/png" />

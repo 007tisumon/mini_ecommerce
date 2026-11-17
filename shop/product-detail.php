@@ -33,7 +33,7 @@ $relatedProducts = store_get_products('', '', false, (string) $selectedProduct['
             <label class="visually-hidden" for="detailQuantity">Quantity</label>
             <input id="detailQuantity" type="number" name="quantity" min="1"
                    max="<?= h(min((int) $selectedProduct['stock'], 20)) ?>" value="1">
-            <button class="hero-shop-button" type="submit">Add to your basket <span aria-hidden="true">→</span></button>
+            <button class="hero-shop-button" type="submit">Add to cart <span aria-hidden="true">→</span></button>
         </form>
         <div class="detail-promises">
             <span><i>✿</i> Carefully arranged</span>
@@ -50,7 +50,7 @@ $relatedProducts = store_get_products('', '', false, (string) $selectedProduct['
         </div>
         <div class="product-grid">
             <?php foreach (array_slice($relatedProducts, 0, 4) as $product): ?>
-                <?php require __DIR__ . '/partials/product-card.php'; ?>
+                <?php require PROJECT_ROOT . '/shop/partials/product-card.php'; ?>
             <?php endforeach; ?>
         </div>
     </section>

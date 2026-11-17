@@ -1,32 +1,17 @@
 <?php
-declare(strict_types=1);
 
-function database(): PDO
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', rtrim($_SERVER['DOCUMENT_ROOT'] ?? 'C:/xampp_lite_8_5/www', '/\\') . '/mini_ecommerce');
+}
+
+function database()
 {
-    static $pdo = null;
+    static $connection;
 
-    if ($pdo instanceof PDO) {
-        return $pdo;
+    if (!$connection) {
+        $connection = mysqli_connect('localhost', 'root', '', 'bloom_basket');
+        mysqli_set_charset($connection, 'utf8mb4');
     }
 
-    $host = getenv('DB_HOST') ?: '127.0.0.1';
-    $port = getenv('DB_PORT') ?: '3306';
-    $database = getenv('DB_DATABASE') ?: 'bloom_basket';
-    $username = getenv('DB_USERNAME') ?: 'root';
-    $password = getenv('DB_PASSWORD') ?: '';
-
-    $dsn = sprintf(
-        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-        $host,
-        $port,
-        $database
-    );
-
-    $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
-
-    return $pdo;
+    return $connection;
 }

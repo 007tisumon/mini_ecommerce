@@ -1,67 +1,48 @@
-(() => {
-    const menuButton = document.querySelector('[data-store-menu-toggle]');
-    const menu = document.querySelector('#storeNavLinks');
+$(function () {
+    var $menuButton = $('[data-store-menu-toggle]');
+    var $menu = $('#storeNavLinks');
 
-    menuButton?.addEventListener('click', () => {
-        const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
-        menuButton.setAttribute('aria-expanded', String(!isOpen));
-        menuButton.setAttribute('aria-label', isOpen ? 'Open menu' : 'Close menu');
-        menu?.classList.toggle('is-open', !isOpen);
+    $menuButton.on('click', function () {
+        var isOpen = $(this).attr('aria-expanded') === 'true';
+        $(this).attr({
+            'aria-expanded': String(!isOpen),
+            'aria-label': isOpen ? 'Open menu' : 'Close menu'
+        });
+        $menu.toggleClass('is-open', !isOpen);
     });
 
-    menu?.querySelectorAll('a, button').forEach((item) => {
-        item.addEventListener('click', () => {
-            menu.classList.remove('is-open');
-            menuButton?.setAttribute('aria-expanded', 'false');
-            menuButton?.setAttribute('aria-label', 'Open menu');
+    $menu.find('a, button').on('click', function () {
+        $menu.removeClass('is-open');
+        $menuButton.attr({
+            'aria-expanded': 'false',
+            'aria-label': 'Open menu'
         });
     });
 
-    document.querySelectorAll('[data-dismiss-alert]').forEach((button) => {
-        button.addEventListener('click', () => button.closest('.store-alert')?.remove());
+    $(document).on('click', '[data-dismiss-alert]', function () {
+        $(this).closest('.store-alert').remove();
     });
 
-    document.querySelectorAll('[data-store-password]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const input = button.parentElement?.querySelector('input');
-            if (!(input instanceof HTMLInputElement)) {
-                return;
-            }
-
-            const visible = input.type === 'text';
-            input.type = visible ? 'password' : 'text';
-            button.textContent = visible ? 'Show' : 'Hide';
-            button.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
-        });
+    $('[data-store-password]').on('click', function () {
+        var $input = $(this).parent().find('input');
+        var isVisible = $input.attr('type') === 'text';
+        $input.attr('type', isVisible ? 'password' : 'text');
+        $(this).text(isVisible ? 'Show' : 'Hide');
+        $(this).attr('aria-label', isVisible ? 'Show password' : 'Hide password');
     });
 
-    document.querySelectorAll('[data-image-fallback]').forEach((image) => {
-        image.addEventListener('error', () => {
-            if (!(image instanceof HTMLImageElement) || image.dataset.fallbackApplied === 'true') {
-                return;
-            }
-
-            image.dataset.fallbackApplied = 'true';
-            if (image.dataset.fallbackSrc) {
-                image.src = image.dataset.fallbackSrc;
-            } else {
-                image.hidden = true;
-            }
-        });
-    });
-
-    const paymentMethods = document.querySelectorAll('[data-payment-method]');
-    const simulatedPayment = document.querySelector('[data-simulated-payment]');
-
-    const updatePaymentOptions = () => {
-        const selected = document.querySelector('[data-payment-method]:checked');
-        const showSimulation = selected instanceof HTMLInputElement && selected.value !== 'cod';
-        if (simulatedPayment instanceof HTMLElement) {
-            simulatedPayment.hidden = !showSimulation;
+    $('img[data-image-fallback]').on('error', function () {
+        var $image = $(this);
+        if ($image.attr('data-fallback-applied') === 'true') {
+            return;
         }
-    };
 
-    paymentMethods.forEach((method) => {
-        method.addEventListener('change', updatePaymentOptions);
+        $image.attr('data-fallback-applied', 'true');
+        var fallback = $image.attr('data-fallback-src');
+        if (fallback) {
+            $image.attr('src', fallback);
+        } else {
+            $image.hide();
+        }
     });
-})();
+});

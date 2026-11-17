@@ -6,7 +6,8 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-require_once __DIR__ . '/../config/database.php';
+define('PROJECT_ROOT', 'C:/xampp_lite_8_5/www/mini_ecommerce');
+require_once PROJECT_ROOT . '/config/database.php';
 
 $email = trim((string) ($argv[1] ?? ''));
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -22,10 +23,10 @@ if (strlen($password) < 12) {
     exit(1);
 }
 
-$pdo = database();
-$statement = $pdo->prepare('SELECT id, role FROM users WHERE email = :email LIMIT 1');
-$statement->execute(['email' => $email]);
-$admin = $statement->fetch();
+$connection = database();
+$emailSql = $connection->real_escape_string($email);
+$result = $connection->query("SELECT id, role FROM users WHERE email = '$emailSql' LIMIT 1");
+$admin = $result->fetch_assoc();
 
 if (!is_array($admin)) {
     fwrite(STDERR, "No user has that email. Import the database and check the admin email first.\n");
@@ -37,10 +38,8 @@ if ($admin['role'] !== 'admin') {
     exit(1);
 }
 
-$update = $pdo->prepare('UPDATE users SET password = :password WHERE id = :id AND role = \'admin\'');
-$update->execute([
-    'password' => password_hash($password, PASSWORD_DEFAULT),
-    'id' => (int) $admin['id'],
-]);
+$passwordSql = $connection->real_escape_string(password_hash($password, PASSWORD_DEFAULT));
+$adminId = (int) $admin['id'];
+$connection->query("UPDATE users SET password = '$passwordSql' WHERE id = $adminId AND role = 'admin'");
 
 fwrite(STDOUT, "Admin password updated for {$email}.\n");

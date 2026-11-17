@@ -2302,10 +2302,9 @@ a.sidebar-link:hover {
 }
 
 .product-card-bottom {
-    display: flex;
-    margin-top: 3px;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    margin-top: 9px;
+    gap: 8px;
 }
 
 .product-stock {
@@ -2314,6 +2313,7 @@ a.sidebar-link:hover {
 }
 
 .product-card-bottom form {
+    width: 100%;
     margin: 0;
 }
 
@@ -2322,28 +2322,29 @@ a.sidebar-link:hover {
 }
 
 .product-add-button {
-    display: inline-flex;
-    width: 28px;
-    height: 28px;
+    display: flex;
+    width: 100%;
+    min-height: 40px;
     align-items: center;
     justify-content: center;
-    border: 1px solid #dfe5da;
-    border-radius: 50%;
-    color: #3a6547;
-    background: #fff;
-    font-size: 18px;
-    font-weight: 300;
-    transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+    border: 1px solid #d5bd50;
+    border-radius: 4px;
+    color: #263a30;
+    background: #f5dc72;
+    font-size: 14px;
+    font-weight: 650;
+    transition: background 140ms ease, border-color 140ms ease;
 }
 
 .product-add-button:hover:not(:disabled) {
-    border-color: var(--store-green);
-    color: #fff;
-    background: var(--store-green);
+    border-color: #b89f49;
+    background: #ebcf5d;
 }
 
 .product-add-button:disabled {
-    color: #a8afa5;
+    border-color: #e4e3da;
+    color: #899087;
+    background: #f2f1e8;
     cursor: not-allowed;
 }
 
@@ -4370,9 +4371,9 @@ a.sidebar-link:hover {
     }
 
     .product-add-button {
-        width: 25px;
-        height: 25px;
-        font-size: 16px;
+        width: 100%;
+        min-height: 40px;
+        font-size: 14px;
     }
 
     .story-banner {
@@ -4843,5 +4844,168 @@ a.sidebar-link:hover {
 
     .order-detail-heading .text-link {
         font-size: 7px;
+    }
+}
+
+/* Storefront text sizing */
+.store-body {
+    font-size: 16px;
+}
+
+.store-body :is(p, a, button, label, input, select, textarea, small) {
+    font-size: max(14px, 0.875em);
+}
+
+.store-body .store-brand small {
+    font-size: 8px;
+}
+
+.store-body .store-announcement {
+    font-size: 12px;
+}
+
+.store-body .store-nav-link,
+.store-body .store-account-link,
+.store-body .store-bag-link,
+.store-body .store-logout-link,
+.store-body .store-alert {
+    font-size: 14px;
+}
+
+.store-body :is(.hero-eyebrow, .section-eyebrow, .summary-eyebrow, .footer-column-title, .hero-footnote, .hero-photo-label, .product-badge, .story-photo-caption) {
+    font-size: 10px;
+}
+
+.store-body .shop-hero-copy > p,
+.store-body .story-banner-copy p,
+.store-body .detail-description {
+    font-size: 16px;
+}
+
+.store-body .hero-shop-button,
+.store-body .checkout-button,
+.store-body .place-order-button,
+.store-body .cart-update-button,
+.store-body .remove-item {
+    font-size: 14px;
+}
+
+.store-body .hero-note strong {
+    font-size: 14px;
+}
+
+.store-body .hero-note small,
+.store-body .checkout-summary-copy small,
+.store-body .payment-copy small {
+    font-size: 12px;
+}
+
+.store-body .shop-trust-row > span,
+.store-body .category-chip strong,
+.store-body .product-filter-links a,
+.store-body .product-limit-note,
+.store-body .footer-links-column a,
+.store-body .store-footer-bottom,
+.store-body .store-breadcrumb,
+.store-body .detail-stock-note,
+.store-body .detail-promises span,
+.store-body .detail-delivery-note,
+.store-body .cart-item-price,
+.store-body .cart-line-total,
+.store-body .summary-line,
+.store-body .summary-total,
+.store-body .summary-small-note,
+.store-body .summary-secure,
+.store-body .summary-payments > strong,
+.store-body .shop-page-heading > p,
+.store-body .cart-item-quantity label,
+.store-body .checkout-step p,
+.store-body .checkout-field label,
+.store-body .payment-copy strong,
+.store-body .checkout-privacy-note,
+.store-body .checkout-summary-item > span,
+.store-body .checkout-edit-link,
+.store-body .checkout-mini-note,
+.store-body .checkout-signin-note p,
+.store-body .checkout-create-account,
+.store-body .auth-aside p,
+.store-body .auth-card > p,
+.store-body .auth-switch,
+.store-body .auth-demo-note,
+.store-body .customer-order-bottom,
+.store-body .order-detail-item,
+.store-body .order-payment-note {
+    font-size: 14px;
+}
+
+.store-body .category-chip small,
+.store-body .product-category,
+.store-body .product-stock,
+.store-body .detail-image-stamp,
+.store-body .summary-payments > span,
+.store-body .cart-panel-title,
+.store-body .checkout-summary-title,
+.store-body .checkout-field label span,
+.store-body .payment-tag,
+.store-body .order-status-pill,
+.store-body .order-detail-item i {
+    font-size: 12px;
+}
+
+.store-body .product-quick-view {
+    font-size: 12px;
+}
+
+.store-body .product-title-row h3 {
+    font-size: 16px;
+}
+
+.store-body .product-title-row h3 a {
+    font-size: inherit;
+}
+
+.store-body .product-price,
+.store-body .cart-item-copy h2,
+.store-body .checkout-summary-copy strong,
+.store-body .customer-order-bottom > strong {
+    font-size: 16px;
+}
+
+.store-body .summary-total strong,
+.store-body .customer-order-top > div strong,
+.store-body .order-detail-item > strong {
+    font-size: 16px;
+}
+
+.store-body .store-footer-bottom i {
+    font-size: 14px;
+}
+
+.store-body .bag-count {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+}
+
+.store-body .product-add-button {
+    font-size: 14px;
+}
+
+@media (max-width: 1000px) {
+    .store-body .shop-trust-row > span:not(.trust-bangladesh) {
+        font-size: 12px;
+    }
+
+    .store-body .product-title-row h3,
+    .store-body .product-price {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 390px) {
+    .store-body .bag-count {
+        width: 19px;
+        height: 19px;
+        font-size: 11px;
     }
 }

@@ -111,7 +111,7 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
     <?php else: ?>
         <div class="product-grid">
             <?php foreach ($products as $product): ?>
-                <?php require __DIR__ . '/partials/product-card.php'; ?>
+                <?php require PROJECT_ROOT . '/shop/partials/product-card.php'; ?>
             <?php endforeach; ?>
         </div>
         <?php if (count($products) === 24): ?>

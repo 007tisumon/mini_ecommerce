@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/includes/helpers.php';
-require_once __DIR__ . '/includes/store.php';
+define('PROJECT_ROOT', rtrim($_SERVER['DOCUMENT_ROOT'] ?? 'C:/xampp_lite_8_5/www', '/\\') . '/mini_ecommerce');
+require_once PROJECT_ROOT . '/config/database.php';
+require_once PROJECT_ROOT . '/includes/helpers.php';
+require_once PROJECT_ROOT . '/includes/store.php';
 
 start_app_session();
 
@@ -48,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ];
                     store_redirect('index.php');
                 }
-            } catch (PDOException $exception) {
+            } catch (mysqli_sql_exception $exception) {
                 error_log('Bloom Basket add-to-cart database error: ' . $exception->getMessage());
                 $pageError = 'We could not add that flower right now. Please try again.';
             }
@@ -102,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             store_redirect('index.php?page=cart');
         } catch (InvalidArgumentException $exception) {
             $pageError = $exception->getMessage();
-        } catch (PDOException $exception) {
+        } catch (mysqli_sql_exception $exception) {
             error_log('Bloom Basket cart update database error: ' . $exception->getMessage());
             $pageError = 'We could not update your basket right now. Please try again.';
         }
@@ -125,21 +127,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pageError = 'Your password confirmation does not match.';
         } else {
             try {
-                $statement = database()->prepare(
-                    'INSERT INTO users (name, email, password, phone, role)
-                     VALUES (:name, :email, :password, :phone, \'customer\')'
+                $connection = database();
+                $nameSql = $connection->real_escape_string($name);
+                $emailSql = $connection->real_escape_string($email);
+                $passwordSql = $connection->real_escape_string(password_hash($password, PASSWORD_DEFAULT));
+                $phoneSql = $phone === '' ? 'NULL' : "'" . $connection->real_escape_string($phone) . "'";
+                $connection->query(
+                    "INSERT INTO users (name, email, password, phone, role)
+                     VALUES ('$nameSql', '$emailSql', '$passwordSql', $phoneSql, 'customer')"
                 );
-                $statement->execute([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => password_hash($password, PASSWORD_DEFAULT),
-                    'phone' => $phone !== '' ? $phone : null,
-                ]);
-                store_sign_in((int) database()->lastInsertId(), $name, $email, $phone, 'customer');
+                store_sign_in($connection->insert_id, $name, $email, $phone, 'customer');
                 $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your account is ready. Welcome to Bloom Basket!'];
                 store_redirect(($_GET['next'] ?? '') === 'checkout' ? 'index.php?page=checkout' : 'index.php');
-            } catch (PDOException $exception) {
-                if ($exception->getCode() === '23000') {
+            } catch (mysqli_sql_exception $exception) {
+                if ($exception->getCode() === 1062) {
                     $pageError = 'That email already has an account. Sign in instead.';
                 } else {
                     error_log('Bloom Basket registration database error: ' . $exception->getMessage());
@@ -155,12 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pageError = 'Enter a valid email address and password.';
         } else {
             try {
-                $statement = database()->prepare(
-                    'SELECT id, name, email, password, phone, role
-                     FROM users WHERE email = :email LIMIT 1'
+                $emailSql = database()->real_escape_string($email);
+                $result = database()->query(
+                    "SELECT id, name, email, password, phone, role
+                     FROM users WHERE email = '$emailSql' LIMIT 1"
                 );
-                $statement->execute(['email' => $email]);
-                $user = $statement->fetch();
+                $user = $result->fetch_assoc();
 
                 if (
                     is_array($user)
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $pageError = 'We could not verify those customer details. Please try again.';
-            } catch (PDOException $exception) {
+            } catch (mysqli_sql_exception $exception) {
                 error_log('Bloom Basket customer sign-in database error: ' . $exception->getMessage());
                 $pageError = 'Sign-in is temporarily unavailable. Please check the database connection.';
             }
@@ -203,7 +204,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $city = trim((string) ($_POST['city'] ?? ''));
         $postalCode = trim((string) ($_POST['postal_code'] ?? ''));
         $paymentMethod = (string) ($_POST['payment_method'] ?? '');
-        $testResult = (string) ($_POST['test_result'] ?? 'success');
 
         if ($recipient === '' || strlen($recipient) > 100) {
             $pageError = 'Enter the recipient’s name (up to 100 characters).';
@@ -213,10 +213,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pageError = 'Enter a delivery address (up to 255 characters).';
         } elseif (strlen($area) > 100 || $city === '' || strlen($city) > 100 || strlen($postalCode) > 20) {
             $pageError = 'Check the area, city, and postal code fields.';
-        } elseif (!in_array($paymentMethod, ['cod', 'bkash', 'nagad', 'rocket'], true)) {
+        } elseif (!in_array($paymentMethod, ['cod', 'bkash'], true)) {
             $pageError = 'Choose one of the available payment methods.';
-        } elseif (!in_array($testResult, ['success', 'failed'], true)) {
-            $pageError = 'Choose a valid simulated payment result.';
         } else {
             try {
                 $orderId = store_place_order(
@@ -227,15 +225,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $area,
                     $city,
                     $postalCode,
-                    $paymentMethod,
-                    $testResult
+                    $paymentMethod
                 );
                 $_SESSION['store_cart'] = [];
                 $_SESSION['last_order_id'] = $orderId;
                 store_redirect('index.php?page=orders');
             } catch (DomainException $exception) {
                 $pageError = $exception->getMessage();
-            } catch (PDOException $exception) {
+            } catch (mysqli_sql_exception $exception) {
                 error_log('Bloom Basket checkout database error: ' . $exception->getMessage());
                 $pageError = 'We could not place your order. Please try again in a moment.';
             }
@@ -257,7 +254,7 @@ $orderItems = [];
 $orderNotice = '';
 $catalogError = false;
 
-if ($page === 'home' || $page === 'cart' || $page === 'checkout') {
+if (in_array($page, ['home', 'cart', 'checkout', 'orders'], true)) {
     try {
         if ($page === 'home') {
             $categories = store_get_categories();
@@ -295,7 +292,7 @@ if ($page === 'home' || $page === 'cart' || $page === 'checkout') {
                 }
             }
         }
-    } catch (PDOException $exception) {
+    } catch (mysqli_sql_exception $exception) {
         error_log('Bloom Basket storefront database error: ' . $exception->getMessage());
         $catalogError = true;
     }
@@ -315,7 +312,7 @@ $selectedCategory = trim((string) ($_GET['category'] ?? ''));
 $cartSubtotal = store_cart_subtotal($cartItems);
 $deliveryFee = $cartItems === [] ? 0.0 : STORE_DELIVERY_FEE;
 
-require __DIR__ . '/shop/partials/header.php';
+require PROJECT_ROOT . '/shop/partials/header.php';
 ?>
 
 <?php if ($pageNotice !== ''): ?>
@@ -338,20 +335,20 @@ require __DIR__ . '/shop/partials/header.php';
 
 <?php if ($page === 'home'): ?>
     <?php if ($selectedProduct !== null): ?>
-        <?php require __DIR__ . '/shop/product-detail.php'; ?>
+        <?php require PROJECT_ROOT . '/shop/product-detail.php'; ?>
     <?php else: ?>
-        <?php require __DIR__ . '/shop/home.php'; ?>
+        <?php require PROJECT_ROOT . '/shop/home.php'; ?>
     <?php endif; ?>
 <?php elseif ($page === 'cart'): ?>
-    <?php require __DIR__ . '/shop/cart.php'; ?>
+    <?php require PROJECT_ROOT . '/shop/cart.php'; ?>
 <?php elseif ($page === 'checkout'): ?>
-    <?php require __DIR__ . '/shop/checkout.php'; ?>
+    <?php require PROJECT_ROOT . '/shop/checkout.php'; ?>
 <?php elseif ($page === 'login'): ?>
-    <?php require __DIR__ . '/shop/login.php'; ?>
+    <?php require PROJECT_ROOT . '/shop/login.php'; ?>
 <?php elseif ($page === 'register'): ?>
-    <?php require __DIR__ . '/shop/register.php'; ?>
+    <?php require PROJECT_ROOT . '/shop/register.php'; ?>
 <?php elseif ($page === 'orders'): ?>
-    <?php require __DIR__ . '/shop/orders.php'; ?>
+    <?php require PROJECT_ROOT . '/shop/orders.php'; ?>
 <?php endif; ?>
 
-<?php require __DIR__ . '/shop/partials/footer.php'; ?>
+<?php require PROJECT_ROOT . '/shop/partials/footer.php'; ?>

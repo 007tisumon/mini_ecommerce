@@ -62,7 +62,7 @@ declare(strict_types=1);
             </section>
 
             <section class="checkout-section">
-                <div class="checkout-step"><span>02</span><div><h2>How would you like to pay?</h2><p>Pick what feels right for you.</p></div></div>
+                <div class="checkout-step"><span>02</span><div><h2>How would you like to pay?</h2><p>Choose cash on delivery or the bKash demo. No real payment is made.</p></div></div>
                 <div class="payment-options">
                     <label class="payment-option">
                         <input type="radio" name="payment_method" value="cod" checked data-payment-method>
@@ -71,23 +71,13 @@ declare(strict_types=1);
                         <span class="payment-copy"><strong>Cash on delivery</strong><small>Pay when your flowers arrive</small></span>
                         <span class="payment-tag">EASY</span>
                     </label>
-                    <?php foreach (['bkash' => 'bKash', 'nagad' => 'Nagad', 'rocket' => 'Rocket'] as $method => $label): ?>
-                        <label class="payment-option">
-                            <input type="radio" name="payment_method" value="<?= h($method) ?>" data-payment-method>
-                            <span class="payment-radio"></span>
-                            <span class="payment-icon payment-<?= h($method) ?>" aria-hidden="true"><?= h(strtoupper(substr($label, 0, 1))) ?></span>
-                            <span class="payment-copy"><strong><?= h($label) ?></strong><small>Demo payment for testing only</small></span>
-                            <span class="payment-tag">SIMULATED</span>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-                <div class="simulated-payment-choice" hidden data-simulated-payment>
-                    <span>For this demo, choose a test result. No payment gateway is connected.</span>
-                    <label for="testResult">Test payment result</label>
-                    <select id="testResult" name="test_result">
-                        <option value="success">Simulate successful payment</option>
-                        <option value="failed">Simulate failed payment</option>
-                    </select>
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="bkash" data-payment-method>
+                        <span class="payment-radio"></span>
+                        <span class="payment-icon payment-bkash" aria-hidden="true">B</span>
+                        <span class="payment-copy"><strong>bKash demo</strong><small>No real payment is made</small></span>
+                        <span class="payment-tag">DEMO</span>
+                    </label>
                 </div>
             </section>
             <button class="place-order-button" type="submit">Place my flower order <span aria-hidden="true">→</span></button>

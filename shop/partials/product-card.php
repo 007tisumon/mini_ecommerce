@@ -32,8 +32,8 @@ $isOutOfStock = (int) ($product['stock'] ?? 0) < 1;
                 <input type="hidden" name="product_id" value="<?= h((int) $product['id']) ?>">
                 <input type="hidden" name="quantity" value="1">
                 <button class="product-add-button" type="submit" <?= $isOutOfStock ? 'disabled' : '' ?>
-                        aria-label="Add <?= h((string) $product['name']) ?> to your bag">
-                    <span aria-hidden="true">+</span>
+                        aria-label="Add <?= h((string) $product['name']) ?> to cart">
+                    Add to cart
                 </button>
             </form>
         </div>
