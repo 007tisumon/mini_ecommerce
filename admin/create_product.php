@@ -42,21 +42,22 @@ require  'partials/header.php';
                 <h5 class="card-title">Add New Product</h5>
                 <hr />
                 <div class="form-body mt-4">
-                    <form action="create.php" method="post" enctype="multipart/form-data">
+                    <form action="create.php" id="create-form" method="post" enctype="multipart/form-data">
+                        <div id="create-form-message" class="alert d-none" role="alert" aria-live="polite"></div>
                         <div class="row">
                             <div class="col-lg-8">
                                 <div class="border border-3 p-4 rounded">
                                     <div class="mb-3">
                                         <label for="inputProductTitle" class="form-label">Product Title</label>
-                                        <input type="text" name="name" class="form-control" id="inputProductTitle" placeholder="Enter product title">
+                                        <input type="text" name="name" class="form-control" id="inputProductTitle" placeholder="Enter product title" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="inputProductDescription" class="form-label">Description</label>
-                                        <textarea name="description" class="form-control" id="inputProductDescription" placeholder="Example........." rows="3"></textarea>
+                                        <textarea name="description" class="form-control" id="inputProductDescription" placeholder="Example........." rows="3" required></textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label for="inputProductDescription" class="form-label">Product Images</label>
-                                        <input name="image" type="file" accept="image/*">
+                                        <input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
                                     </div>
                                 </div>
                             </div>
@@ -65,24 +66,24 @@ require  'partials/header.php';
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label for="inputPrice" class="form-label">Price</label>
-                                            <input name="price" type="text" class="form-control" id="inputPrice" placeholder="Price">
+                                            <input name="price" type="number" min="0.01" step="0.01" class="form-control" id="inputPrice" placeholder="Price" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputCompareatprice" class="form-label">Stock</label>
-                                            <input name="stock" type="number" class="form-control" id="inputCompareatprice" placeholder="Stock">
+                                            <input name="stock" type="number" min="0" step="1" class="form-control" id="inputCompareatprice" placeholder="Stock" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputCostPerPrice" class="form-label">Slug</label>
-                                            <input name="slug" type="text" class="form-control" id="inputCostPerPrice" placeholder="Slug">
+                                            <input name="slug" type="text" class="form-control" id="inputCostPerPrice" placeholder="Slug" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="inputStarPoints" class="form-label">SKU</label>
-                                            <input name="sku" type="text" class="form-control" id="inputStarPoints" placeholder="Unique SKU">
+                                            <input name="sku" type="text" class="form-control" id="inputStarPoints" placeholder="Unique SKU" required>
                                         </div>
                                         <div class="col-12">
                                             <label for="inputProductType" class="form-label">Category</label>
-                                            <select name="categories" class="form-select" id="inputProductType">
-                                                <option selected disabled>Select One</option>
+                                            <select name="categories" class="form-select" id="inputProductType" required>
+                                                <option value="" selected disabled>Select One</option>
                                                 <?php
                                                 $categories = $conn->query("SELECT * FROM categories");
                                                 while ($ctg = $categories->fetch_assoc()) {
@@ -118,7 +119,7 @@ require  'partials/header.php';
                                     </div> -->
                                         <div class="col-12">
                                             <div class="d-grid">
-                                                <input type="submit" value="Save Product" class="btn btn-light">
+                                                <input type="submit" id="createbtn" value="Save Product" class="btn btn-light">
                                             </div>
                                         </div>
                                     </div>
@@ -141,3 +142,43 @@ require   'partials/scripts.php';
 
 
 ?>
+
+<script>
+    $(function() {
+        const $form = $("#create-form");
+        const $button = $("#createbtn");
+        const $message = $("#create-form-message");
+
+        $form.on("submit", function(event) {
+            event.preventDefault();
+            $message.addClass("d-none").removeClass("alert-danger alert-success").text("");
+            $button.prop("disabled", true).val("Saving...");
+
+            $.ajax({
+                url: $form.attr("action"),
+                method: "POST",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                dataType: "json"
+            }).done(function(response) {
+                if (response.success && response.redirect) {
+                    window.location.href = response.redirect;
+                    return;
+                }
+
+                $message.removeClass("d-none").addClass("alert-danger")
+                    .text(response.message || "The product could not be saved.");
+                $button.prop("disabled", false).val("Save Product");
+            }).fail(function(xhr, textStatus) {
+                const response = xhr.responseJSON || {};
+                const message = response.message || (textStatus === "parsererror"
+                    ? "The server returned an invalid response. Check the product list before resubmitting."
+                    : `Product save request failed (HTTP ${xhr.status}). Please try again.`);
+                $message.removeClass("d-none").addClass("alert-danger")
+                    .text(message);
+                $button.prop("disabled", false).val("Save Product");
+            });
+        });
+    });
+</script>
