@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 define('PROJECT_ROOT', rtrim($_SERVER['DOCUMENT_ROOT'] ?? 'C:/xampp_lite_8_5/www', '/\\') . '/mini_ecommerce');
 require_once PROJECT_ROOT . '/config/database.php';

@@ -4,29 +4,13 @@ require "functions.php";
 role_check('admin');
 require '../database/config.php';
 
-$product = null;
+
 $pageError = null;
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-if (!$id || $id < 1) {
-    $pageError = "A valid product ID is required.";
-} else {
-    $productQuery = $conn->prepare("SELECT * FROM products WHERE id = ?");
-    if (!$productQuery) {
-        $pageError = "Unable to load this product right now.";
-    } else {
-        $productQuery->bind_param("i", $id);
-        if ($productQuery->execute()) {
-            $product = $productQuery->get_result()->fetch_assoc();
-            if (!$product) {
-                $pageError = "Product not found.";
-            }
-        } else {
-            $pageError = "Unable to load this product right now.";
-        }
-        $productQuery->close();
-    }
-}
+
+$product = $conn->query("SELECT * FROM products WHERE id = '$id'");
+$product = $product->fetch_assoc();
 
 $categories = [];
 $categoryQuery = $conn->query("SELECT id, name FROM categories ORDER BY name");
@@ -34,8 +18,6 @@ if ($categoryQuery) {
     while ($category = $categoryQuery->fetch_assoc()) {
         $categories[] = $category;
     }
-} elseif (!$pageError) {
-    $pageError = "Unable to load product categories right now.";
 }
 
 require 'partials/head.php';
@@ -56,12 +38,9 @@ require 'partials/header.php';
             </div>
         </div>
 
-        <?php if ($pageError) { ?>
-            <div class="alert alert-danger" role="alert">
-                <?php echo htmlspecialchars($pageError, ENT_QUOTES, 'UTF-8'); ?>
-                <a class="alert-link ms-2" href="admin_products.php">Back to products</a>
-            </div>
-        <?php } elseif ($product) { ?>
+        
+           
+        <?php if($product) { ?>
             <div class="card">
                 <div class="card-body p-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -69,7 +48,11 @@ require 'partials/header.php';
                             <h5 class="card-title mb-1">Edit Product</h5>
                             <p class="text-muted mb-0">Update product details and inventory.</p>
                         </div>
-                        <a href="admin_products.php" class="btn btn-outline-secondary">Back to products</a>
+                        <form action="delete-product.php" method="post"
+                            onsubmit="return confirm('Are you sure you want to delete this product?');">
+                            <input type="hidden" name="id" value="<?php echo $product['id']; ?>">
+                            <button type="submit" class="btn btn-danger">Delete product</button>
+                        </form>
                     </div>
                     <hr>
 
@@ -110,7 +93,7 @@ require 'partials/header.php';
                                             <label for="product-price" class="form-label">Price</label>
                                             <input name="price" type="number" min="0.01" max="99999999.99" step="0.01"
                                                 class="form-control" id="product-price"
-                                                value="<?php echo htmlspecialchars( $product['price'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                                value="<?php echo $product['price']; ?>" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="product-stock" class="form-label">Stock</label>
@@ -122,7 +105,7 @@ require 'partials/header.php';
                                             <label for="product-slug" class="form-label">Slug</label>
                                             <input name="slug" type="text" maxlength="170"
                                                 class="form-control" id="product-slug"
-                                                value="<?php echo htmlspecialchars($product['slug'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                                value="<?php echo $product['slug']; ?>" required>
                                             <div class="form-text">Suggested from the product title; you can edit it.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -181,18 +164,18 @@ require 'partials/footer.php';
 require 'partials/scripts.php';
 ?>
 <script>
-    $(function () {
+    $(function() {
         let $form = $('#update-product-form');
         let $feedback = $('#update-feedback');
         let $saveButton = $('#save-product');
         let slugEdited = false;
         let previewUrl = null;
 
-        $('#product-slug').on('input', function () {
+        $('#product-slug').on('input', function() {
             slugEdited = true;
         });
 
-        $('#product-name').on('input', function () {
+        $('#product-name').on('input', function() {
             if (!slugEdited) {
                 $('#product-slug').val($(this).val()
                     .toLowerCase()
@@ -202,7 +185,7 @@ require 'partials/scripts.php';
             }
         });
 
-        $('#product-image').on('change', function () {
+        $('#product-image').on('change', function() {
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
             }
@@ -212,7 +195,7 @@ require 'partials/scripts.php';
             }
         });
 
-        $form.on('submit', function (event) {
+        $form.on('submit', function(event) {
             event.preventDefault();
             $feedback.addClass('d-none').removeClass('alert-danger alert-success').empty();
             $saveButton.prop('disabled', true).text('Saving...');
@@ -224,25 +207,25 @@ require 'partials/scripts.php';
                 processData: false,
                 contentType: false,
                 dataType: 'json'
-            }).done(function (response) {
+            }).done(function(response) {
                 if (!response.success) {
                     showErrors(response.errors || [response.message || 'Unable to update the product.']);
                     return;
                 }
                 window.location.href = response.redirect;
-            }).fail(function (xhr) {
+            }).fail(function(xhr) {
                 var response = xhr.responseJSON;
-                showErrors(response && response.errors
-                    ? response.errors
-                    : [response && response.message ? response.message : 'Unable to update the product. Please try again.']);
-            }).always(function () {
+                showErrors(response && response.errors ?
+                    response.errors :
+                    [response && response.message ? response.message : 'Unable to update the product. Please try again.']);
+            }).always(function() {
                 $saveButton.prop('disabled', false).text('Save changes');
             });
         });
 
         function showErrors(messages) {
             var $list = $('<ul class="mb-0"></ul>');
-            $.each(messages, function (_, message) {
+            $.each(messages, function(_, message) {
                 $('<li></li>').text(message).appendTo($list);
             });
             $feedback.addClass('alert-danger').removeClass('d-none alert-success').append($list);
