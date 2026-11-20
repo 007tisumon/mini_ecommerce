@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 function start_app_session(): void
 {

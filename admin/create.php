@@ -132,7 +132,7 @@ if ($image !== null && $image['error'] !== UPLOAD_ERR_NO_FILE) {
         if (!isset($extensions[$mime_type])) {
             $errors[] = 'Image format must be JPG, PNG, WEBP, or GIF.';
         } else {
-            $upload_directory = __DIR__ . '/assets/images/products';
+            $upload_directory = 'admin/assets/images/products';
             if (!is_dir($upload_directory) && !mkdir($upload_directory, 0755, true) && !is_dir($upload_directory)) {
                 $errors[] = 'The image upload folder could not be created.';
             } else {
@@ -161,14 +161,14 @@ try {
     );
 } catch (mysqli_sql_exception $exception) {
     if ($image_path !== null) {
-        unlink(__DIR__ . '/' . $image_path);
+        unlink('admin/' . $image_path);
     }
     error_log('Product insert preparation failed: ' . $exception->getMessage());
     respond_json(500, ['success' => false, 'message' => 'Could not prepare the product record. Check the database schema and try again.']);
 }
 if (!$insert) {
     if ($image_path !== null) {
-        unlink(__DIR__ . '/' . $image_path);
+        unlink('admin/' . $image_path);
     }
     error_log('Product insert preparation failed: ' . $conn->error);
     respond_json(500, ['success' => false, 'message' => 'The database could not prepare the product insert. Check the PHP error log.']);
@@ -200,7 +200,7 @@ try {
 
 if (!$inserted) {
     if ($image_path !== null) {
-        unlink(__DIR__ . '/' . $image_path);
+        unlink('admin/' . $image_path);
     }
     $insert_error_code = $insert_error_code ?: $insert->errno;
     error_log('Product insert failed: ' . ($insert_error ?? $insert->error));

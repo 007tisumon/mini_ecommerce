@@ -15,7 +15,7 @@ $brandMark = '<span class="store-brand-mark" aria-hidden="true"><span></span></s
           rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
           crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= h(app_url('assets/css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= h('/mini_ecommerce/assets/css/style.css') ?>">
 </head>
 <body class="store-body">
 <div class="store-announcement">
@@ -27,33 +27,31 @@ $brandMark = '<span class="store-brand-mark" aria-hidden="true"><span></span></s
                 aria-controls="storeNavLinks" data-store-menu-toggle>
             <span></span><span></span><span></span>
         </button>
-        <a class="store-brand" href="<?= h(app_url('index.php')) ?>">
+        <a class="store-brand" href="<?= h('/mini_ecommerce/index.php') ?>">
             <?= $brandMark ?>
             <span>Bloom Basket<small>FLOWERS, WITH FEELING</small></span>
         </a>
         <div class="store-nav-links" id="storeNavLinks">
-            <a class="store-nav-link" href="<?= h(app_url('index.php#shop')) ?>">Shop all</a>
-            <a class="store-nav-link" href="<?= h(app_url('index.php?featured=1#shop')) ?>">Bestsellers</a>
-            <a class="store-nav-link" href="<?= h(app_url('index.php#our-story')) ?>">Our story</a>
+            <a class="store-nav-link" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Shop all</a>
+            <a class="store-nav-link" href="<?= h('/mini_ecommerce/index.php?featured=1#shop') ?>">Bestsellers</a>
+            <a class="store-nav-link" href="<?= h('/mini_ecommerce/index.php#our-story') ?>">Our story</a>
             <?php if ($customer !== null): ?>
-                <form action="<?= h(app_url('index.php?action=logout')) ?>" method="post" class="mobile-store-logout">
-                    <?= csrf_field() ?>
+                <form action="<?= h('/mini_ecommerce/index.php?action=logout') ?>" method="post" class="mobile-store-logout">
                     <button type="submit">Sign out</button>
                 </form>
             <?php endif; ?>
         </div>
         <div class="store-nav-actions">
-            <a class="store-account-link" href="<?= h(app_url($customer !== null ? 'index.php?page=orders' : 'index.php?page=login')) ?>">
+            <a class="store-account-link" href="<?= h('/mini_ecommerce/' . ($customer !== null ? 'index.php?page=orders' : 'index.php?page=login')) ?>">
                 <span class="account-icon" aria-hidden="true">♙</span>
                 <span><?= $customer !== null ? h((string) $customer['name']) : 'Sign in' ?></span>
             </a>
             <?php if ($customer !== null): ?>
-                <form action="<?= h(app_url('index.php?action=logout')) ?>" method="post" class="store-logout-form">
-                    <?= csrf_field() ?>
+                <form action="<?= h('/mini_ecommerce/index.php?action=logout') ?>" method="post" class="store-logout-form">
                     <button class="store-logout-link" type="submit">Sign out</button>
                 </form>
             <?php endif; ?>
-            <a class="store-bag-link" href="<?= h(app_url('index.php?page=cart')) ?>" aria-label="Shopping basket, <?= h($cartCount) ?> items">
+            <a class="store-bag-link" href="<?= h('/mini_ecommerce/index.php?page=cart') ?>" aria-label="Shopping basket, <?= h($cartCount) ?> items">
                 <span class="bag-icon" aria-hidden="true">♧</span>
                 <span class="bag-label">Bag</span>
                 <span class="bag-count"><?= h($cartCount) ?></span>

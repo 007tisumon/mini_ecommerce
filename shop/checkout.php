@@ -12,19 +12,18 @@ declare(strict_types=1);
         <span class="empty-flower" aria-hidden="true">✿</span>
         <h2>Nothing to check out just yet.</h2>
         <p>Choose your flowers first, then we’ll get them on their way.</p>
-        <a class="hero-shop-button" href="<?= h(app_url('index.php#shop')) ?>">Explore the flowers <span aria-hidden="true">→</span></a>
+        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
     </section>
 <?php elseif ($customer === null): ?>
     <section class="checkout-signin-note">
         <span class="checkout-note-icon" aria-hidden="true">✿</span>
         <div><strong>Let’s get to know you first.</strong><p>Sign in or create a free customer account to keep your order history in one place.</p></div>
-        <a class="hero-shop-button" href="<?= h(app_url('index.php?page=login&next=checkout')) ?>">Sign in to continue <span aria-hidden="true">→</span></a>
-        <a class="checkout-create-account" href="<?= h(app_url('index.php?page=register&next=checkout')) ?>">New here? Create an account</a>
+        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php?page=login&next=checkout') ?>">Sign in to continue <span aria-hidden="true">→</span></a>
+        <a class="checkout-create-account" href="<?= h('/mini_ecommerce/index.php?page=register&next=checkout') ?>">New here? Create an account</a>
     </section>
 <?php else: ?>
     <div class="checkout-layout">
-        <form action="<?= h(app_url('index.php?page=checkout&action=checkout')) ?>" method="post" class="checkout-form">
-            <?= csrf_field() ?>
+        <form action="<?= h('/mini_ecommerce/index.php?page=checkout&action=checkout') ?>" method="post" class="checkout-form">
             <section class="checkout-section">
                 <div class="checkout-step"><span>01</span><div><h2>Where should we deliver?</h2><p>A real address helps your flowers find their way home.</p></div></div>
                 <div class="checkout-fields">
@@ -91,7 +90,7 @@ declare(strict_types=1);
                     <div class="checkout-summary-item">
                         <div class="checkout-thumb">
                             <img src="<?= h(store_product_image($item)) ?>" alt=""
-                                 data-fallback-src="<?= h(app_url('assets/images/flower-placeholder.svg')) ?>"
+                                 data-fallback-src="<?= h('/mini_ecommerce/assets/images/flower-placeholder.svg') ?>"
                                  data-image-fallback>
                             <span><?= h((int) $item['quantity']) ?></span>
                         </div>
@@ -105,7 +104,7 @@ declare(strict_types=1);
                 <div class="summary-line"><span>Dhaka delivery</span><span><?= h(store_money($deliveryFee)) ?></span></div>
                 <div class="summary-total"><span>Total</span><strong><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
             </div>
-            <a class="checkout-edit-link" href="<?= h(app_url('index.php?page=cart')) ?>">← Change something in my basket</a>
+            <a class="checkout-edit-link" href="<?= h('/mini_ecommerce/index.php?page=cart') ?>">← Change something in my basket</a>
             <div class="checkout-mini-note"><span aria-hidden="true">✿</span> Arranged by hand, delivered with care.</div>
         </aside>
     </div>

@@ -1,12 +1,12 @@
 <?php
 
-require_once PROJECT_ROOT . '/config/database.php';
+
 
 const STORE_DELIVERY_FEE = 80;
 
 function store_redirect($path)
 {
-    header('Location: ' . app_url($path));
+    header('Location: /mini_ecommerce/' . ltrim($path, '/'));
     exit;
 }
 
@@ -74,14 +74,14 @@ function store_product_image($product)
     $imagePath = str_replace('\\', '/', trim($product['image_path'] ?? ''));
 
     if (strpos($imagePath, 'assets/images/products/') === 0) {
-        if (is_file(PROJECT_ROOT . '/admin/' . $imagePath)) {
-            return app_url('admin/' . $imagePath);
+        if (is_file('admin/' . $imagePath)) {
+            return '/mini_ecommerce/admin/' . $imagePath;
         }
     }
 
-    $localImage = PROJECT_ROOT . '/assets/images/' . ltrim($imagePath, '/');
+    $localImage = 'assets/images/' . ltrim($imagePath, '/');
     if ($imagePath !== '' && is_file($localImage)) {
-        return app_url('assets/images/' . ltrim($imagePath, '/'));
+        return '/mini_ecommerce/assets/images/' . ltrim($imagePath, '/');
     }
 
     return store_product_fallback_image($product);

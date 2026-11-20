@@ -6,8 +6,7 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-define('PROJECT_ROOT', 'C:/xampp_lite_8_5/www/mini_ecommerce');
-require_once PROJECT_ROOT . '/config/database.php';
+require_once 'config/database.php';
 
 $email = trim((string) ($argv[1] ?? ''));
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

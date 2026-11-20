@@ -136,7 +136,7 @@ if (!$errors && is_array($image) && ($image['error'] ?? UPLOAD_ERR_NO_FILE) !== 
         if (!isset($allowedTypes[$mimeType])) {
             $errors[] = "Choose a JPG, PNG, WEBP or GIF image.";
         } else {
-            $uploadDirectory = __DIR__ . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . 'products';
+            $uploadDirectory = 'admin/assets/images/products';
             if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
                 $errors[] = "The image could not be saved. Please try again.";
             } else {

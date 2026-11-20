@@ -6,8 +6,6 @@ if(isset($_SESSION['email'])){
 	exit();
 }
 
-// $dir = str_replace('\\', '/', __DIR__);
-
 require 'partials/head.php';
 require '../database/config.php';
 $errorMessage = '';

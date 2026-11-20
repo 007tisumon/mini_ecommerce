@@ -9,7 +9,7 @@ if ($customer !== null) {
             <span class="section-eyebrow">YOU’RE ALREADY PART OF THE GARDEN</span>
             <h1>You’re in, <em><?= h((string) $customer['name']) ?>.</em></h1>
             <p>Shop your favourite fresh flowers or check on an order.</p>
-            <a class="hero-shop-button" href="<?= h(app_url('index.php#shop')) ?>">Explore the flowers <span aria-hidden="true">→</span></a>
+            <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
         </div>
     </section>
     <?php
@@ -32,8 +32,7 @@ if ($customer !== null) {
             <span class="section-eyebrow">COME ON IN</span>
             <h1>Let’s get<br><em>to know you.</em></h1>
             <p>Creating an account takes just a moment.</p>
-            <form class="auth-form" action="<?= h(app_url($registerAction)) ?>" method="post">
-                <?= csrf_field() ?>
+            <form class="auth-form" action="<?= h('/mini_ecommerce/' . ltrim($registerAction, '/')) ?>" method="post">
                 <div class="checkout-field">
                     <label for="registerName">Your name</label>
                     <input id="registerName" name="name" type="text" maxlength="100"
@@ -64,7 +63,7 @@ if ($customer !== null) {
                 </div>
                 <button class="place-order-button" type="submit">Create my account <span aria-hidden="true">→</span></button>
             </form>
-            <div class="auth-switch">Already have an account? <a href="<?= h(app_url($loginLink)) ?>">Sign in</a></div>
+            <div class="auth-switch">Already have an account? <a href="<?= h('/mini_ecommerce/' . ltrim($loginLink, '/')) ?>">Sign in</a></div>
         </div>
     </section>
     <?php

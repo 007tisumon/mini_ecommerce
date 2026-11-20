@@ -1,9 +1,9 @@
 <?php
 
-define('PROJECT_ROOT', rtrim($_SERVER['DOCUMENT_ROOT'] ?? 'C:/xampp_lite_8_5/www', '/\\') . '/mini_ecommerce');
-require_once PROJECT_ROOT . '/config/database.php';
-require_once PROJECT_ROOT . '/includes/helpers.php';
-require_once PROJECT_ROOT . '/includes/store.php';
+require_once 'database/config.php';
+require_once 'config/database.php';
+require_once  'includes/helpers.php';
+require_once 'includes/store.php';
 
 start_app_session();
 
@@ -19,94 +19,70 @@ if (!in_array($page, $allowedPages, true)) {
 $flash = $_SESSION['_store_flash'] ?? null;
 unset($_SESSION['_store_flash']);
 $pageError = '';
-$pageNotice = is_array($flash) ? (string) ($flash['message'] ?? '') : '';
-$pageNoticeType = is_array($flash) ? (string) ($flash['type'] ?? 'success') : 'success';
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_is_valid($_POST['csrf_token'] ?? null)) {
-        http_response_code(403);
-        $pageError = 'Your form has expired. Refresh the page and try again.';
-    } elseif ($action === 'cart-add') {
+
+    if ($action === 'cart-add') {
         $productId = filter_var($_POST['product_id'] ?? null, FILTER_VALIDATE_INT);
         $quantity = filter_var($_POST['quantity'] ?? 1, FILTER_VALIDATE_INT);
 
-        if ($productId === false || $productId === null || $quantity === false || $quantity < 1 || $quantity > 20) {
-            $pageError = 'Please choose a valid product quantity.';
-        } else {
-            try {
-                $product = store_find_product_by_id($productId);
 
-                if ($product === null || (int) $product['stock'] < 1) {
-                    $pageError = 'That flower is currently unavailable.';
-                } else {
-                    $cart = store_cart();
-                    $currentQuantity = (int) ($cart[$productId] ?? 0);
-                    $cart[$productId] = min($currentQuantity + $quantity, (int) $product['stock']);
-                    $_SESSION['store_cart'] = $cart;
-                    $_SESSION['_store_flash'] = [
-                        'type' => 'success',
-                        'message' => $product['name'] . ' is in your basket.',
-                    ];
-                    store_redirect('index.php');
-                }
-            } catch (mysqli_sql_exception $exception) {
-                error_log('Bloom Basket add-to-cart database error: ' . $exception->getMessage());
-                $pageError = 'We could not add that flower right now. Please try again.';
-            }
+
+        $product = store_find_product_by_id($productId);
+
+        if ($product === null || (int) $product['stock'] < 1) {
+            $pageError = 'That flower is currently unavailable.';
+        } else {
+            $cart = store_cart();
+            $currentQuantity = (int) ($cart[$productId] ?? 0);
+            $cart[$productId] = min($currentQuantity + $quantity, (int) $product['stock']);
+            $_SESSION['store_cart'] = $cart;
+            $_SESSION['_store_flash'] = [
+                'type' => 'success',
+                'message' => $product['name'] . ' is in your basket.',
+            ];
+            store_redirect('index.php');
         }
     } elseif ($action === 'cart-update') {
-        try {
-            $cart = store_cart();
-            $removeProductId = filter_var($_POST['remove_product_id'] ?? null, FILTER_VALIDATE_INT);
 
-            if ($removeProductId !== false && $removeProductId !== null) {
-                unset($cart[$removeProductId]);
-                $_SESSION['store_cart'] = $cart;
-                $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'That flower was removed from your basket.'];
-                store_redirect('index.php?page=cart');
-            }
+        $cart = store_cart();
+        $removeProductId = filter_var($_POST['remove_product_id'] ?? null, FILTER_VALIDATE_INT);
 
-            $submittedQuantities = $_POST['quantity'] ?? [];
-
-            if (!is_array($submittedQuantities)) {
-                throw new InvalidArgumentException('Invalid cart quantities.');
-            }
-
-            foreach ($cart as $productId => $oldQuantity) {
-                $submitted = $submittedQuantities[$productId] ?? '0';
-
-                if (is_array($submitted) || !preg_match('/^\d+$/', (string) $submitted)) {
-                    throw new InvalidArgumentException('Please enter a valid quantity for each item.');
-                }
-
-                $quantity = (int) $submitted;
-                if ($quantity === 0) {
-                    unset($cart[$productId]);
-                    continue;
-                }
-
-                if ($quantity > 20) {
-                    throw new InvalidArgumentException('A maximum of 20 of each item can be ordered.');
-                }
-
-                $product = store_find_product_by_id($productId);
-                if ($product === null || (int) $product['stock'] < 1) {
-                    unset($cart[$productId]);
-                    continue;
-                }
-
-                $cart[$productId] = min($quantity, (int) $product['stock']);
-            }
-
+        if ($removeProductId !== false && $removeProductId !== null) {
+            unset($cart[$removeProductId]);
             $_SESSION['store_cart'] = $cart;
-            $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your basket has been updated.'];
+            $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'That flower was removed from your basket.'];
             store_redirect('index.php?page=cart');
-        } catch (InvalidArgumentException $exception) {
-            $pageError = $exception->getMessage();
-        } catch (mysqli_sql_exception $exception) {
-            error_log('Bloom Basket cart update database error: ' . $exception->getMessage());
-            $pageError = 'We could not update your basket right now. Please try again.';
         }
+
+        $submittedQuantities = $_POST['quantity'] ?? [];
+
+        if (!is_array($submittedQuantities)) {
+            throw new InvalidArgumentException('Invalid cart quantities.');
+        }
+
+        foreach ($cart as $productId => $oldQuantity) {
+            $submitted = $submittedQuantities[$productId] ?? '0';
+
+            $quantity = (int) $submitted;
+            if ($quantity === 0) {
+                unset($cart[$productId]);
+                continue;
+            }
+
+            $product = store_find_product_by_id($productId);
+            if ($product === null || (int) $product['stock'] < 1) {
+                unset($cart[$productId]);
+                continue;
+            }
+
+            $cart[$productId] = min($quantity, (int) $product['stock']);
+        }
+
+        $_SESSION['store_cart'] = $cart;
+        $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your basket has been updated.'];
+        store_redirect('index.php?page=cart');
     } elseif ($action === 'register') {
         $name = trim((string) ($_POST['name'] ?? ''));
         $email = trim((string) ($_POST['email'] ?? ''));
@@ -125,27 +101,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($password !== $passwordConfirmation) {
             $pageError = 'Your password confirmation does not match.';
         } else {
-            try {
-                $connection = database();
-                $nameSql = $connection->real_escape_string($name);
-                $emailSql = $connection->real_escape_string($email);
-                $passwordSql = $connection->real_escape_string(password_hash($password, PASSWORD_DEFAULT));
-                $phoneSql = $phone === '' ? 'NULL' : "'" . $connection->real_escape_string($phone) . "'";
-                $connection->query(
-                    "INSERT INTO users (name, email, password, phone, role)
-                     VALUES ('$nameSql', '$emailSql', '$passwordSql', $phoneSql, 'customer')"
-                );
-                store_sign_in($connection->insert_id, $name, $email, $phone, 'customer');
-                $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your account is ready. Welcome to Bloom Basket!'];
-                store_redirect(($_GET['next'] ?? '') === 'checkout' ? 'index.php?page=checkout' : 'index.php');
-            } catch (mysqli_sql_exception $exception) {
-                if ($exception->getCode() === 1062) {
-                    $pageError = 'That email already has an account. Sign in instead.';
-                } else {
-                    error_log('Bloom Basket registration database error: ' . $exception->getMessage());
-                    $pageError = 'We could not create your account right now. Please try again.';
-                }
-            }
+
+
+            $password = password_hash($password, PASSWORD_DEFAULT);
+          
+            $conn->query(
+                "INSERT INTO users (name, email, password, phone, role)
+                     VALUES ('$name', '$email', '$password', $phone, 'customer')"
+            );
+            store_sign_in($conn->insert_id, $name, $email, $phone, 'customer');
+            $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your account is ready. Welcome to Bloom Basket!'];
+            store_redirect(($_GET['next'] ?? '') === 'checkout' ? 'index.php?page=checkout' : 'index.php');
         }
     } elseif ($action === 'login') {
         $email = trim((string) ($_POST['email'] ?? ''));
@@ -154,40 +120,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
             $pageError = 'Enter a valid email address and password.';
         } else {
-            try {
-                $emailSql = database()->real_escape_string($email);
-                $result = database()->query(
-                    "SELECT id, name, email, password, phone, role
-                     FROM users WHERE email = '$emailSql' LIMIT 1"
+
+            $result = $conn->query(
+                "SELECT id, name, email, password, phone, role
+                     FROM users WHERE email = '$email' LIMIT 1"
+            );
+            $user = $result->fetch_assoc();
+
+            if (
+                is_array($user)
+                && $user['role'] === 'customer'
+                && password_verify($password, (string) $user['password'])
+            ) {
+                store_sign_in(
+                    (int) $user['id'],
+                    (string) $user['name'],
+                    (string) $user['email'],
+                    (string) ($user['phone'] ?? ''),
+                    'customer'
                 );
-                $user = $result->fetch_assoc();
-
-                if (
-                    is_array($user)
-                    && $user['role'] === 'customer'
-                    && password_verify($password, (string) $user['password'])
-                ) {
-                    store_sign_in(
-                        (int) $user['id'],
-                        (string) $user['name'],
-                        (string) $user['email'],
-                        (string) ($user['phone'] ?? ''),
-                        'customer'
-                    );
-                    $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Welcome back!'];
-                    store_redirect(($_GET['next'] ?? '') === 'checkout' ? 'index.php?page=checkout' : 'index.php');
-                }
-
-                $pageError = 'We could not verify those customer details. Please try again.';
-            } catch (mysqli_sql_exception $exception) {
-                error_log('Bloom Basket customer sign-in database error: ' . $exception->getMessage());
-                $pageError = 'Sign-in is temporarily unavailable. Please check the database connection.';
+                $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Welcome back!'];
+                store_redirect(($_GET['next'] ?? '') === 'checkout' ? 'index.php?page=checkout' : 'index.php');
             }
+
         }
     } elseif ($action === 'logout') {
         unset($_SESSION['customer_user']);
         session_regenerate_id(true);
-        $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
         $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'You have signed out. See you again soon.'];
         store_redirect('index.php');
     } elseif ($action === 'checkout') {
@@ -215,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($paymentMethod, ['cod', 'bkash'], true)) {
             $pageError = 'Choose one of the available payment methods.';
         } else {
-            try {
+           
                 $orderId = store_place_order(
                     (int) $_SESSION['customer_user']['id'],
                     $recipient,
@@ -229,15 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['store_cart'] = [];
                 $_SESSION['last_order_id'] = $orderId;
                 store_redirect('index.php?page=orders');
-            } catch (DomainException $exception) {
-                $pageError = $exception->getMessage();
-            } catch (mysqli_sql_exception $exception) {
-                error_log('Bloom Basket checkout database error: ' . $exception->getMessage());
-                $pageError = 'We could not place your order. Please try again in a moment.';
-            }
+            
         }
     } else {
-        http_response_code(400);
+
         $pageError = 'That action is not available.';
     }
 }
@@ -254,7 +208,7 @@ $orderNotice = '';
 $catalogError = false;
 
 if (in_array($page, ['home', 'cart', 'checkout', 'orders'], true)) {
-    try {
+   
         if ($page === 'home') {
             $categories = store_get_categories();
             $products = store_get_products(
@@ -291,11 +245,7 @@ if (in_array($page, ['home', 'cart', 'checkout', 'orders'], true)) {
                 }
             }
         }
-    } catch (mysqli_sql_exception $exception) {
-        error_log('Bloom Basket storefront database error: ' . $exception->getMessage());
-        $catalogError = true;
     }
-}
 
 $pageTitles = [
     'home' => $selectedProduct !== null ? (string) $selectedProduct['name'] : 'Fresh flowers, thoughtfully delivered',
@@ -311,43 +261,25 @@ $selectedCategory = trim((string) ($_GET['category'] ?? ''));
 $cartSubtotal = store_cart_subtotal($cartItems);
 $deliveryFee = $cartItems === [] ? 0.0 : STORE_DELIVERY_FEE;
 
-require PROJECT_ROOT . '/shop/partials/header.php';
+require 'shop/partials/header.php';
 ?>
-
-<?php if ($pageNotice !== ''): ?>
-    <div class="store-alert store-alert-<?= h($pageNoticeType) ?>" role="status">
-        <?= h($pageNotice) ?>
-        <button type="button" class="store-alert-close" aria-label="Dismiss message" data-dismiss-alert>&times;</button>
-    </div>
-<?php endif; ?>
-<?php if ($pageError !== ''): ?>
-    <div class="store-alert store-alert-error" role="alert">
-        <?= h($pageError) ?>
-        <button type="button" class="store-alert-close" aria-label="Dismiss message" data-dismiss-alert>&times;</button>
-    </div>
-<?php endif; ?>
-<?php if ($catalogError): ?>
-    <div class="store-alert store-alert-warning" role="alert">
-        We couldn’t load the shop just now. Check your database connection and refresh the page.
-    </div>
-<?php endif; ?>
 
 <?php if ($page === 'home'): ?>
     <?php if ($selectedProduct !== null): ?>
-        <?php require PROJECT_ROOT . '/shop/product-detail.php'; ?>
+        <?php require 'shop/product-detail.php'; ?>
     <?php else: ?>
-        <?php require PROJECT_ROOT . '/shop/home.php'; ?>
+        <?php require 'shop/home.php'; ?>
     <?php endif; ?>
 <?php elseif ($page === 'cart'): ?>
-    <?php require PROJECT_ROOT . '/shop/cart.php'; ?>
+    <?php require 'shop/cart.php'; ?>
 <?php elseif ($page === 'checkout'): ?>
-    <?php require PROJECT_ROOT . '/shop/checkout.php'; ?>
+    <?php require 'shop/checkout.php'; ?>
 <?php elseif ($page === 'login'): ?>
-    <?php require PROJECT_ROOT . '/shop/login.php'; ?>
+    <?php require 'shop/login.php'; ?>
 <?php elseif ($page === 'register'): ?>
-    <?php require PROJECT_ROOT . '/shop/register.php'; ?>
+    <?php require 'shop/register.php'; ?>
 <?php elseif ($page === 'orders'): ?>
-    <?php require PROJECT_ROOT . '/shop/orders.php'; ?>
+    <?php require 'shop/orders.php'; ?>
 <?php endif; ?>
 
-<?php require PROJECT_ROOT . '/shop/partials/footer.php'; ?>
+<?php require 'shop/partials/footer.php'; ?>
