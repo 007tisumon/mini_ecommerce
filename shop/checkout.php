@@ -24,11 +24,14 @@
 <?php else: ?>
     <div class="checkout-layout">
         <form action="<?= h('index.php?page=checkout&action=checkout') ?>" method="post" class="checkout-form">
+<<<<<<< HEAD
             <?php if ($pageError !== ''): ?>
                 <div class="store-alert store-alert-warning" role="alert">
                     <span><?= h($pageError) ?></span>
                 </div>
             <?php endif; ?>
+=======
+>>>>>>> 81168884d7d248b513d5e1dc3df1d88d75f20382
             <section class="checkout-section">
                 <div class="checkout-step"><span>01</span><div><h2>Where should we deliver?</h2><p>A real address helps your flowers find their way home.</p></div></div>
                 <div class="checkout-fields">
