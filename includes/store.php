@@ -6,7 +6,7 @@ const STORE_DELIVERY_FEE = 80;
 
 function store_redirect($path)
 {
-    header('Location: /mini_ecommerce/' . ltrim($path, '/'));
+    header('Location: ' . ltrim($path, '/'));
     exit;
 }
 
@@ -75,13 +75,13 @@ function store_product_image($product)
 
     if (strpos($imagePath, 'assets/images/products/') === 0) {
         if (is_file('admin/' . $imagePath)) {
-            return '/mini_ecommerce/admin/' . $imagePath;
+            return 'admin/' . $imagePath;
         }
     }
 
     $localImage = 'assets/images/' . ltrim($imagePath, '/');
     if ($imagePath !== '' && is_file($localImage)) {
-        return '/mini_ecommerce/assets/images/' . ltrim($imagePath, '/');
+        return 'assets/images/' . ltrim($imagePath, '/');
     }
 
     return store_product_fallback_image($product);

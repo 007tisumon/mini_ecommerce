@@ -19,7 +19,7 @@ function admin_is_authenticated(): bool
 function require_admin(): void
 {
     if (!admin_is_authenticated()) {
-        header('Location: /mini_ecommerce/admin/login.php');
+        header('Location: signin.php');
         exit;
     }
 }

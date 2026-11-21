@@ -11,23 +11,23 @@ declare(strict_types=1);
         <span class="empty-flower" aria-hidden="true">✿</span>
         <h2>Your basket is waiting to bloom.</h2>
         <p>It’s looking a little lonely in here. Add a few fresh flowers and we’ll take it from there.</p>
-        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
+        <a class="hero-shop-button" href="<?= h('index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
     </section>
 <?php else: ?>
     <div class="cart-layout">
         <section class="cart-items-panel" aria-label="Basket items">
             <div class="cart-panel-title"><span>YOUR FLOWERS</span><span><?= count($cartItems) ?> <?= count($cartItems) === 1 ? 'arrangement' : 'arrangements' ?></span></div>
-            <form action="<?= h('/mini_ecommerce/index.php?page=cart&action=cart-update') ?>" method="post">
+            <form action="<?= h('index.php?page=cart&action=cart-update') ?>" method="post">
                 <?php foreach ($cartItems as $item): ?>
                     <article class="cart-item">
-                        <a class="cart-item-image" href="<?= h('/mini_ecommerce/index.php?product=' . rawurlencode((string) $item['slug'])) ?>">
+                        <a class="cart-item-image" href="<?= h('index.php?product=' . rawurlencode((string) $item['slug'])) ?>">
                             <img src="<?= h(store_product_image($item)) ?>" alt=""
-                                 data-fallback-src="<?= h('/mini_ecommerce/assets/images/flower-placeholder.svg') ?>"
+                                 data-fallback-src="<?= h('assets/images/flower-placeholder.svg') ?>"
                                  data-image-fallback>
                         </a>
                         <div class="cart-item-copy">
                             <span class="product-category"><?= h((string) $item['category_name']) ?></span>
-                            <h2><a href="<?= h('/mini_ecommerce/index.php?product=' . rawurlencode((string) $item['slug'])) ?>"><?= h((string) $item['name']) ?></a></h2>
+                            <h2><a href="<?= h('index.php?product=' . rawurlencode((string) $item['slug'])) ?>"><?= h((string) $item['name']) ?></a></h2>
                             <span class="cart-item-price"><?= h(store_money((string) $item['price'])) ?></span>
                             <button class="remove-item" type="submit" name="remove_product_id" value="<?= h((int) $item['id']) ?>">Remove</button>
                         </div>
@@ -42,7 +42,7 @@ declare(strict_types=1);
                     </article>
                 <?php endforeach; ?>
                 <div class="cart-update-row">
-                    <a class="text-link" href="<?= h('/mini_ecommerce/index.php#shop') ?>">← Keep exploring</a>
+                    <a class="text-link" href="<?= h('index.php#shop') ?>">← Keep exploring</a>
                     <button class="cart-update-button" type="submit">Update basket</button>
                 </div>
             </form>
@@ -54,7 +54,7 @@ declare(strict_types=1);
             <div class="summary-line"><span>Dhaka delivery</span><span><?= h(store_money($deliveryFee)) ?></span></div>
             <div class="summary-total"><span>Total</span><strong><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
             <p class="summary-small-note">Final total includes delivery, so there are no surprises at the door.</p>
-            <a class="checkout-button" href="<?= h('/mini_ecommerce/index.php?page=checkout') ?>">A little something, on its way <span aria-hidden="true">→</span></a>
+            <a class="checkout-button" href="<?= h('index.php?page=checkout') ?>">A little something, on its way <span aria-hidden="true">→</span></a>
             <div class="summary-secure"><span>✿</span> Thoughtfully packaged, always.</div>
             <div class="summary-payments">
                 <span>PAY YOUR WAY</span>
