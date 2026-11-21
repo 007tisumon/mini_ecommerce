@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 
 $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured']);
 ?>
@@ -45,7 +45,7 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
         <div class="store-empty-note">New flower collections are on their way. Come back soon.</div>
     <?php else: ?>
         <div class="category-chips">
-            <a class="category-chip" href="<?= h('/mini_ecommerce/index.php#shop') ?>">
+            <a class="category-chip" href="<?= h('index.php#shop') ?>">
                 <span class="category-chip-icon chip-all" aria-hidden="true">✿</span>
                 <span><strong>Everything lovely</strong><small>All the flowers</small></span>
                 <span class="category-arrow" aria-hidden="true">↗</span>
@@ -55,7 +55,7 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
                 $chipClasses = ['chip-rose', 'chip-bouquet', 'chip-wedding', 'chip-green'];
                 $chipIcons = ['✿', '❀', '❋', '❦'];
                 ?>
-                <a class="category-chip" href="<?= h('/mini_ecommerce/index.php?category=' . rawurlencode((string) $category['slug']) . '#shop') ?>">
+                <a class="category-chip" href="<?= h('index.php?category=' . rawurlencode((string) $category['slug']) . '#shop') ?>">
                     <span class="category-chip-icon <?= h($chipClasses[$index % count($chipClasses)]) ?>" aria-hidden="true"><?= h($chipIcons[$index % count($chipIcons)]) ?></span>
                     <span><strong><?= h((string) $category['name']) ?></strong><small><?= h((int) $category['product_count']) ?> beautiful things</small></span>
                     <span class="category-arrow" aria-hidden="true">↗</span>
@@ -71,7 +71,7 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
             <span class="section-eyebrow"><?= $hasFilters ? 'JUST WHAT YOU WERE LOOKING FOR' : 'A FEW CUSTOMER FAVOURITES' ?></span>
             <h2 id="shopHeading"><?= $hasFilters ? 'Your flower edit.' : 'The lovely little ' ?><em><?= $hasFilters ? '' : 'favourites.' ?></em></h2>
         </div>
-        <form class="shop-search" method="get" action="<?= h('/mini_ecommerce/index.php') ?>" role="search">
+        <form class="shop-search" method="get" action="<?= h('index.php') ?>" role="search">
             <label class="visually-hidden" for="flowerSearch">Search flowers</label>
             <span class="search-icon" aria-hidden="true">⌕</span>
             <input id="flowerSearch" type="search" name="q" value="<?= h($query) ?>" placeholder="Find a flower...">
@@ -84,18 +84,18 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
     <div class="product-toolbar">
         <div class="product-filter-links">
             <a class="<?= $selectedCategory === '' && !isset($_GET['featured']) ? 'is-selected' : '' ?>"
-               href="<?= h('/mini_ecommerce/index.php#shop') ?>">All flowers</a>
+               href="<?= h('index.php#shop') ?>">All flowers</a>
             <a class="<?= isset($_GET['featured']) ? 'is-selected' : '' ?>"
-               href="<?= h('/mini_ecommerce/index.php?featured=1#shop') ?>">Bestsellers</a>
+               href="<?= h('index.php?featured=1#shop') ?>">Bestsellers</a>
             <?php foreach ($categories as $category): ?>
                 <a class="<?= $selectedCategory === $category['slug'] ? 'is-selected' : '' ?>"
-                   href="<?= h('/mini_ecommerce/index.php?category=' . rawurlencode((string) $category['slug']) . '#shop') ?>">
+                   href="<?= h('index.php?category=' . rawurlencode((string) $category['slug']) . '#shop') ?>">
                     <?= h((string) $category['name']) ?>
                 </a>
             <?php endforeach; ?>
         </div>
         <?php if ($hasFilters): ?>
-            <a class="clear-filters" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Clear filters <span aria-hidden="true">×</span></a>
+            <a class="clear-filters" href="<?= h('index.php#shop') ?>">Clear filters <span aria-hidden="true">×</span></a>
         <?php else: ?>
             <span class="shop-result-count"><?= count($products) ?> lovely finds</span>
         <?php endif; ?>
@@ -106,7 +106,7 @@ $hasFilters = $query !== '' || $selectedCategory !== '' || isset($_GET['featured
             <span aria-hidden="true">✿</span>
             <h3>Nothing in bloom just yet.</h3>
             <p>Try a different search, or explore all of our fresh flowers.</p>
-            <a class="text-link" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Browse every flower <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="<?= h('index.php#shop') ?>">Browse every flower <span aria-hidden="true">→</span></a>
         </div>
     <?php else: ?>
         <div class="product-grid">

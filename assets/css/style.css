@@ -3156,6 +3156,7 @@ a.sidebar-link:hover {
 }
 
 .checkout-field input,
+.simulated-payment-choice input,
 .simulated-payment-choice select {
     width: 100%;
     min-height: 37px;
@@ -3169,6 +3170,7 @@ a.sidebar-link:hover {
 }
 
 .checkout-field input:focus,
+.simulated-payment-choice input:focus,
 .simulated-payment-choice select:focus {
     border-color: #92ae8d;
     box-shadow: 0 0 0 2px rgb(90 125 82 / 10%);

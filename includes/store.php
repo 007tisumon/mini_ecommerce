@@ -6,7 +6,7 @@ const STORE_DELIVERY_FEE = 80;
 
 function store_redirect($path)
 {
-    header('Location: /mini_ecommerce/' . ltrim($path, '/'));
+    header('Location: ' . ltrim($path, '/'));
     exit;
 }
 
@@ -75,13 +75,13 @@ function store_product_image($product)
 
     if (strpos($imagePath, 'assets/images/products/') === 0) {
         if (is_file('admin/' . $imagePath)) {
-            return '/mini_ecommerce/admin/' . $imagePath;
+            return 'admin/' . $imagePath;
         }
     }
 
     $localImage = 'assets/images/' . ltrim($imagePath, '/');
     if ($imagePath !== '' && is_file($localImage)) {
-        return '/mini_ecommerce/assets/images/' . ltrim($imagePath, '/');
+        return 'assets/images/' . ltrim($imagePath, '/');
     }
 
     return store_product_fallback_image($product);
@@ -236,7 +236,235 @@ function store_cart_subtotal($items)
     return $subtotal;
 }
 
-function store_place_order($customerId, $recipient, $phone, $address, $area, $city, $postalCode, $paymentMethod)
+function bkash_api_post(string $endpoint, array $headers, array $payload): array
+{
+    if (!function_exists('curl_init')) {
+        throw new RuntimeException('The PHP cURL extension is required for bKash sandbox payments.');
+    }
+
+    $curl = curl_init($endpoint);
+    curl_setopt_array($curl, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTPHEADER => array_merge(['Content-Type: application/json', 'Accept: application/json'], $headers),
+        CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_SLASHES),
+    ]);
+
+    $response = curl_exec($curl);
+    $curlError = curl_error($curl);
+    $httpStatus = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+   
+
+    if ($response === false) {
+        throw new RuntimeException('Could not connect to bKash: ' . $curlError);
+    }
+
+    $decoded = json_decode((string) $response, true);
+    if (!is_array($decoded)) {
+        throw new RuntimeException('bKash returned an invalid response.');
+    }
+    if ($httpStatus >= 400) {
+        throw new RuntimeException((string) ($decoded['errorMessageEn'] ?? $decoded['statusMessage'] ?? 'bKash rejected the payment request.'));
+    }
+
+    return $decoded;
+}
+
+function bkash_access_token(): string
+{
+    start_app_session();
+    $now = time();
+    $cached = $_SESSION['bkash_access_token'] ?? null;
+
+    if (is_array($cached) && ($cached['expires_at'] ?? 0) > $now + 300 && !empty($cached['id_token'])) {
+        return (string) $cached['id_token'];
+    }
+
+    $config = bkash_config();
+    if ($config['username'] === '' || $config['password'] === '' || $config['app_key'] === '' || $config['app_secret'] === '') {
+        throw new RuntimeException('bKash sandbox credentials are not configured.');
+    }
+
+    $response = bkash_api_post(
+        $config['base_url'] . '/auth/grant-token',
+        [
+            'username: ' . $config['username'],
+            'password: ' . $config['password'],
+        ],
+        [
+            'app_key' => $config['app_key'],
+            'app_secret' => $config['app_secret'],
+        ]
+    );
+
+    $idToken = (string) ($response['id_token'] ?? '');
+    if ($idToken === '') {
+        throw new RuntimeException((string) ($response['statusMessage'] ?? 'bKash could not create an access token.'));
+    }
+
+    $_SESSION['bkash_access_token'] = [
+        'id_token' => $idToken,
+        'expires_at' => $now + (int) ($response['expires_in'] ?? 3600),
+    ];
+
+    return $idToken;
+}
+
+function bkash_callback_url(int $orderId): string
+{
+    $config = bkash_config();
+    $callbackBaseUrl = rtrim($config['callback_base_url'], '/');
+    $callbackHost = parse_url($callbackBaseUrl, PHP_URL_HOST);
+    if (
+        $callbackBaseUrl === ''
+        || !is_string($callbackHost)
+        || preg_match('/(^|\.)bka\.sh$/i', $callbackHost)
+    ) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php')), '/');
+        $callbackBaseUrl = $scheme . '://' . $host . ($scriptDir === '' ? '' : $scriptDir);
+    }
+
+    return $callbackBaseUrl . '/index.php?action=bkash-callback&order=' . $orderId;
+}
+
+function bkash_create_payment(float $amount, string $invoiceNumber, int $orderId): array
+{
+    $config = bkash_config();
+    $idToken = bkash_access_token();
+    $response = bkash_api_post(
+        $config['base_url'] . '/payment/create',
+        [
+            'authorization: ' . $idToken,
+            'x-app-key: ' . $config['app_key'],
+        ],
+        [
+            'payerReference' => 'CUSTOMER-' . $orderId,
+            'callbackURL' => bkash_callback_url($orderId),
+            'amount' => number_format($amount, 2, '.', ''),
+            'currency' => 'BDT',
+            'intent' => 'sale',
+            'merchantInvoiceNumber' => $invoiceNumber,
+        ]
+    );
+
+    if (empty($response['paymentId']) || empty($response['bkashURL'])) {
+        throw new RuntimeException((string) ($response['errorMessageEn'] ?? 'bKash could not start the sandbox payment.'));
+    }
+
+    return $response;
+}
+
+function bkash_execute_payment(string $paymentId): array
+{
+    $config = bkash_config();
+    return bkash_api_post(
+        $config['base_url'] . '/payment/execute',
+        [
+            'authorization: ' . bkash_access_token(),
+            'x-app-key: ' . $config['app_key'],
+        ],
+        ['paymentId' => $paymentId]
+    );
+}
+
+function bkash_query_payment(string $paymentId): array
+{
+    $config = bkash_config();
+    return bkash_api_post(
+        $config['base_url'] . '/query/payment',
+        [
+            'authorization: ' . bkash_access_token(),
+            'x-app-key: ' . $config['app_key'],
+        ],
+        ['paymentId' => $paymentId]
+    );
+}
+
+function store_update_payment_by_order(int $orderId, string $transactionId, string $status): void
+{
+    $connection = database();
+    $orderId = (int) $orderId;
+    $result = $connection->query(
+        "SELECT id FROM payments WHERE order_id = $orderId ORDER BY created_at DESC, id DESC LIMIT 1"
+    );
+    $payment = $result ? $result->fetch_assoc() : null;
+    if (!is_array($payment)) {
+        throw new RuntimeException('Payment record was not found.');
+    }
+
+    $paymentId = (int) $payment['id'];
+    $transactionIdSql = $connection->real_escape_string($transactionId);
+    $statusSql = $connection->real_escape_string($status);
+    $paidAt = $status === 'success' ? 'NOW()' : 'NULL';
+    $connection->query(
+        "UPDATE payments
+         SET transaction_id = " . ($transactionId === '' ? 'NULL' : "'" . $transactionIdSql . "'") . ",
+             status = '$statusSql', paid_at = $paidAt
+         WHERE id = $paymentId"
+    );
+}
+
+function store_find_bkash_callback_order(int $orderId): ?array
+{
+    $orderId = (int) $orderId;
+    $result = database()->query(
+        "SELECT o.id, o.user_id, o.order_number, o.total_amount,
+                p.amount AS payment_amount, p.payment_method, p.transaction_id, p.status AS payment_status
+         FROM orders o
+         JOIN payments p ON p.order_id = o.id
+         WHERE o.id = $orderId AND p.payment_method = 'bkash'
+         ORDER BY p.created_at DESC, p.id DESC
+         LIMIT 1"
+    );
+
+    return $result->fetch_assoc() ?: null;
+}
+
+function store_cancel_unpaid_order(int $orderId): void
+{
+    $connection = database();
+    $orderId = (int) $orderId;
+    $connection->begin_transaction();
+
+    try {
+        $connection->query(
+            "UPDATE orders SET status = 'cancelled'
+             WHERE id = $orderId AND status = 'pending'"
+        );
+
+        if ($connection->affected_rows === 1) {
+            $items = $connection->query(
+                "SELECT product_id, quantity FROM order_items
+                 WHERE order_id = $orderId AND product_id IS NOT NULL"
+            );
+            if ($items) {
+                while ($item = $items->fetch_assoc()) {
+                    $productId = (int) $item['product_id'];
+                    $quantity = (int) $item['quantity'];
+                    $connection->query(
+                        "UPDATE products SET stock = stock + $quantity
+                         WHERE id = $productId"
+                    );
+                }
+            }
+
+            $connection->query(
+                "UPDATE payments SET status = 'failed', transaction_id = NULL, paid_at = NULL
+                 WHERE order_id = $orderId"
+                );
+        }
+        $connection->commit();
+    } catch (Throwable $exception) {
+        $connection->rollback();
+        throw $exception;
+    }
+}
+
+function store_place_order($customerId, $recipient, $phone, $address, $area, $city, $postalCode, $paymentMethod, $paymentStatus = 'success')
 {
     $cart = store_cart();
     if (!$cart) {
@@ -303,10 +531,10 @@ function store_place_order($customerId, $recipient, $phone, $address, $area, $ci
             );
         }
 
-        $paymentStatus = $paymentMethod === 'cod' ? 'pending' : 'success';
-        $transactionId = $paymentMethod === 'bkash'
-            ? "'DEMO-BKASH-" . strtoupper(bin2hex(random_bytes(4))) . "'"
-            : 'NULL';
+        if (!in_array($paymentStatus, ['pending', 'success', 'failed'], true)) {
+            throw new InvalidArgumentException('Invalid payment status.');
+        }
+        $transactionId = 'NULL';
         $paymentMethod = $connection->real_escape_string($paymentMethod);
         $connection->query(
             "INSERT INTO payments (order_id, payment_method, transaction_id, amount, status, paid_at)

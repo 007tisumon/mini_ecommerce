@@ -1,0 +1,10 @@
+<?php
+
+// Copy this file to bkash.local.php and replace the empty strings.
+return [
+    'username' => '',
+    'password' => '',
+    'app_key' => '',
+    'app_secret' => '',
+    'callback_base_url' => 'https://your-public-domain.example/mini_ecommerce',
+];

@@ -2,6 +2,7 @@
 
 require_once 'database/config.php';
 require_once 'config/database.php';
+require_once 'config/bkash.php';
 require_once  'includes/helpers.php';
 require_once 'includes/store.php';
 
@@ -20,6 +21,89 @@ $flash = $_SESSION['_store_flash'] ?? null;
 unset($_SESSION['_store_flash']);
 $pageError = '';
 
+if ($action === 'bkash-callback') {
+    $status = strtolower(trim((string) ($_GET['status'] ?? '')));
+    $paymentId = trim((string) ($_GET['paymentID'] ?? $_GET['paymentId'] ?? ''));
+    $orderId = filter_var($_GET['order'] ?? null, FILTER_VALIDATE_INT);
+    $paymentOrder = ($orderId !== false && $orderId !== null)
+        ? store_find_bkash_callback_order((int) $orderId)
+        : null;
+
+    if (
+        !is_array($paymentOrder)
+        || $paymentId === ''
+        || (
+            $paymentOrder['payment_status'] !== 'success'
+            && (string) $paymentOrder['transaction_id'] !== $paymentId
+        )
+    ) {
+        $_SESSION['_store_flash'] = ['type' => 'warning', 'message' => 'The bKash sandbox payment could not be verified.'];
+        store_redirect('index.php?page=checkout');
+    }
+
+    try {
+        $paymentResult = null;
+        if ($status === 'success' || $paymentOrder['payment_status'] === 'success') {
+            try {
+                $paymentResult = $paymentOrder['payment_status'] === 'success'
+                    ? bkash_query_payment($paymentId)
+                    : bkash_execute_payment($paymentId);
+            } catch (Throwable $executeException) {
+                $paymentResult = bkash_query_payment($paymentId);
+            }
+            if (($paymentResult['transactionStatus'] ?? '') !== 'Completed') {
+                $paymentResult = bkash_query_payment($paymentId);
+            }
+        }
+
+        $resultAmount = is_array($paymentResult)
+            ? (string) ($paymentResult['amount'] ?? '')
+            : '';
+        $resultInvoice = is_array($paymentResult)
+            ? (string) ($paymentResult['merchantInvoiceNumber'] ?? $paymentResult['merchantInvoice'] ?? '')
+            : '';
+        $amountMatches = $resultAmount !== ''
+            && number_format((float) $resultAmount, 2, '.', '') === number_format((float) $paymentOrder['payment_amount'], 2, '.', '')
+            && number_format((float) $paymentOrder['payment_amount'], 2, '.', '') === number_format((float) $paymentOrder['total_amount'], 2, '.', '');
+        $invoiceMatches = $resultInvoice === '' || hash_equals((string) $paymentOrder['order_number'], $resultInvoice);
+        $transactionMatches = $paymentOrder['payment_status'] !== 'success'
+            || hash_equals(
+                (string) $paymentOrder['transaction_id'],
+                (string) ($paymentResult['trxId'] ?? '')
+            );
+
+        if (
+            is_array($paymentResult)
+            && ($paymentResult['transactionStatus'] ?? '') === 'Completed'
+            && $amountMatches
+            && $invoiceMatches
+            && $transactionMatches
+        ) {
+            $transactionId = (string) ($paymentResult['trxId'] ?? $paymentId);
+            store_update_payment_by_order((int) $orderId, $transactionId, 'success');
+            $_SESSION['store_cart'] = [];
+            $_SESSION['last_order_id'] = (int) $orderId;
+            $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your bKash sandbox payment was successful.'];
+            store_redirect('index.php?page=orders&order=' . (int) $orderId);
+        }
+
+        if (in_array($status, ['failure', 'failed', 'cancel', 'cancelled', 'canceled'], true)
+            && $paymentOrder['payment_status'] !== 'success') {
+            store_cancel_unpaid_order((int) $orderId);
+            $_SESSION['_store_flash'] = ['type' => 'warning', 'message' => 'The bKash sandbox payment was cancelled or failed.'];
+            store_redirect('index.php?page=checkout');
+        }
+
+        $_SESSION['_store_flash'] = [
+            'type' => 'warning',
+            'message' => 'bKash returned to the shop, but the payment is still being verified. Check your order history shortly.',
+        ];
+        store_redirect('index.php?page=orders&order=' . (int) $orderId);
+    } catch (Throwable $exception) {
+        $_SESSION['_store_flash'] = ['type' => 'warning', 'message' => $exception->getMessage()];
+        store_redirect('index.php?page=checkout');
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -174,7 +258,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($paymentMethod, ['cod', 'bkash'], true)) {
             $pageError = 'Choose one of the available payment methods.';
         } else {
-           
+            $orderId = null;
+            try {
+                if ($paymentMethod === 'bkash') {
+                    $missingCredentials = bkash_credentials_missing();
+                    if ($missingCredentials !== []) {
+                        throw new RuntimeException(
+                            'bKash sandbox credentials are not configured. Add BKASH_USERNAME, BKASH_PASSWORD, BKASH_APP_KEY, and BKASH_APP_SECRET to config/bkash.local.php.'
+                        );
+                    }
+                }
+
                 $orderId = store_place_order(
                     (int) $_SESSION['customer_user']['id'],
                     $recipient,
@@ -183,12 +277,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $area,
                     $city,
                     $postalCode,
-                    $paymentMethod
+                    $paymentMethod,
+                    'pending'
                 );
+
+                if ($paymentMethod === 'bkash') {
+                    $customerId = (int) $_SESSION['customer_user']['id'];
+                    $order = store_find_customer_order($orderId, $customerId);
+                    if (!is_array($order)) {
+                        throw new RuntimeException('The pending order could not be found.');
+                    }
+
+                    $payment = bkash_create_payment(
+                        (float) $order['total_amount'],
+                        (string) $order['order_number'],
+                        $orderId
+                    );
+                    store_update_payment_by_order($orderId, (string) $payment['paymentId'], 'pending');
+                    store_redirect((string) $payment['bkashURL']);
+                }
+
                 $_SESSION['store_cart'] = [];
                 $_SESSION['last_order_id'] = $orderId;
                 store_redirect('index.php?page=orders');
-            
+            } catch (Throwable $exception) {
+                if (is_int($orderId) && $orderId > 0 && $paymentMethod === 'bkash') {
+                    try {
+                        store_cancel_unpaid_order($orderId);
+                    } catch (Throwable $cleanupException) {
+                        // Keep the original bKash error visible if cleanup also fails.
+                    }
+                }
+                $pageError = $exception->getMessage();
+            }
         }
     } else {
 

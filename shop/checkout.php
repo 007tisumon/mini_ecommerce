@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 
 ?>
 <section class="shop-page-heading checkout-heading">
@@ -12,18 +12,23 @@ declare(strict_types=1);
         <span class="empty-flower" aria-hidden="true">✿</span>
         <h2>Nothing to check out just yet.</h2>
         <p>Choose your flowers first, then we’ll get them on their way.</p>
-        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
+        <a class="hero-shop-button" href="<?= h('index.php#shop') ?>">Explore the flowers <span aria-hidden="true">→</span></a>
     </section>
 <?php elseif ($customer === null): ?>
     <section class="checkout-signin-note">
         <span class="checkout-note-icon" aria-hidden="true">✿</span>
         <div><strong>Let’s get to know you first.</strong><p>Sign in or create a free customer account to keep your order history in one place.</p></div>
-        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php?page=login&next=checkout') ?>">Sign in to continue <span aria-hidden="true">→</span></a>
-        <a class="checkout-create-account" href="<?= h('/mini_ecommerce/index.php?page=register&next=checkout') ?>">New here? Create an account</a>
+        <a class="hero-shop-button" href="<?= h('index.php?page=login&next=checkout') ?>">Sign in to continue <span aria-hidden="true">→</span></a>
+        <a class="checkout-create-account" href="<?= h('index.php?page=register&next=checkout') ?>">New here? Create an account</a>
     </section>
 <?php else: ?>
     <div class="checkout-layout">
-        <form action="<?= h('/mini_ecommerce/index.php?page=checkout&action=checkout') ?>" method="post" class="checkout-form">
+        <form action="<?= h('index.php?page=checkout&action=checkout') ?>" method="post" class="checkout-form">
+            <?php if ($pageError !== ''): ?>
+                <div class="store-alert store-alert-warning" role="alert">
+                    <span><?= h($pageError) ?></span>
+                </div>
+            <?php endif; ?>
             <section class="checkout-section">
                 <div class="checkout-step"><span>01</span><div><h2>Where should we deliver?</h2><p>A real address helps your flowers find their way home.</p></div></div>
                 <div class="checkout-fields">
@@ -61,7 +66,15 @@ declare(strict_types=1);
             </section>
 
             <section class="checkout-section">
-                <div class="checkout-step"><span>02</span><div><h2>How would you like to pay?</h2><p>Choose cash on delivery or the bKash demo. No real payment is made.</p></div></div>
+                <div class="checkout-step"><span>02</span><div><h2>How would you like to pay?</h2><p>Choose cash on delivery or secure bKash sandbox checkout.</p></div></div>
+                <?php if (bkash_credentials_missing() !== []): ?>
+                    <div class="simulated-payment-choice">
+                        <span><strong>Developer setup required.</strong> Add your sandbox app credentials in
+                            <code>config/bkash.local.php</code>.
+                            Get them from <a href="https://developer.bka.sh/" target="_blank" rel="noopener noreferrer">bKash Developer</a>.
+                            A public HTTPS callback URL is required for testing.</span>
+                    </div>
+                <?php endif; ?>
                 <div class="payment-options">
                     <label class="payment-option">
                         <input type="radio" name="payment_method" value="cod" checked data-payment-method>
@@ -74,8 +87,8 @@ declare(strict_types=1);
                         <input type="radio" name="payment_method" value="bkash" data-payment-method>
                         <span class="payment-radio"></span>
                         <span class="payment-icon payment-bkash" aria-hidden="true">B</span>
-                        <span class="payment-copy"><strong>bKash demo</strong><small>No real payment is made</small></span>
-                        <span class="payment-tag">DEMO</span>
+                        <span class="payment-copy"><strong>bKash sandbox</strong><small>Secure bKash checkout opens</small></span>
+                        <span class="payment-tag">SANDBOX</span>
                     </label>
                 </div>
             </section>
@@ -90,7 +103,7 @@ declare(strict_types=1);
                     <div class="checkout-summary-item">
                         <div class="checkout-thumb">
                             <img src="<?= h(store_product_image($item)) ?>" alt=""
-                                 data-fallback-src="<?= h('/mini_ecommerce/assets/images/flower-placeholder.svg') ?>"
+                                 data-fallback-src="<?= h('assets/images/flower-placeholder.svg') ?>"
                                  data-image-fallback>
                             <span><?= h((int) $item['quantity']) ?></span>
                         </div>
@@ -104,7 +117,7 @@ declare(strict_types=1);
                 <div class="summary-line"><span>Dhaka delivery</span><span><?= h(store_money($deliveryFee)) ?></span></div>
                 <div class="summary-total"><span>Total</span><strong><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
             </div>
-            <a class="checkout-edit-link" href="<?= h('/mini_ecommerce/index.php?page=cart') ?>">← Change something in my basket</a>
+            <a class="checkout-edit-link" href="<?= h('index.php?page=cart') ?>">← Change something in my basket</a>
             <div class="checkout-mini-note"><span aria-hidden="true">✿</span> Arranged by hand, delivered with care.</div>
         </aside>
     </div>

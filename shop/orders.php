@@ -6,7 +6,7 @@ if ($customer === null): ?>
         <span class="empty-flower" aria-hidden="true">✿</span>
         <h1>Your flower stories live here.</h1>
         <p>Sign in to see order updates and remember all the lovely things you’ve sent.</p>
-        <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php?page=login') ?>">Sign in to see my orders <span aria-hidden="true">→</span></a>
+        <a class="hero-shop-button" href="<?= h('index.php?page=login') ?>">Sign in to see my orders <span aria-hidden="true">→</span></a>
     </section>
 <?php elseif ($orderNotice !== '' && isset($selectedOrder) && is_array($selectedOrder)): ?>
     <section class="order-confirmation">
@@ -17,7 +17,7 @@ if ($customer === null): ?>
         <div class="confirmation-number"><span>YOUR ORDER NUMBER</span><strong><?= h((string) $selectedOrder['order_number']) ?></strong></div>
     </section>
     <section class="order-detail-card">
-        <div class="order-detail-heading"><div><span class="section-eyebrow">ORDER DETAILS</span><h2>Everything, just so.</h2></div><a class="text-link" href="<?= h('/mini_ecommerce/index.php?page=orders') ?>">All my orders →</a></div>
+        <div class="order-detail-heading"><div><span class="section-eyebrow">ORDER DETAILS</span><h2>Everything, just so.</h2></div><a class="text-link" href="<?= h('index.php?page=orders') ?>">All my orders →</a></div>
         <div class="order-detail-items">
             <?php foreach ($orderItems as $item): ?>
                 <div class="order-detail-item"><span><?= h((string) $item['product_name']) ?> <i>× <?= h((int) $item['quantity']) ?></i></span><strong><?= h(store_money((string) $item['line_total'])) ?></strong></div>
@@ -39,7 +39,7 @@ if ($customer === null): ?>
             <span class="empty-flower" aria-hidden="true">✿</span>
             <h2>No orders just yet.</h2>
             <p>When you send a little something lovely, you’ll find it here.</p>
-            <a class="hero-shop-button" href="<?= h('/mini_ecommerce/index.php#shop') ?>">Find some flowers <span aria-hidden="true">→</span></a>
+            <a class="hero-shop-button" href="<?= h('index.php#shop') ?>">Find some flowers <span aria-hidden="true">→</span></a>
         </section>
     <?php else: ?>
         <section class="orders-list">
@@ -61,7 +61,7 @@ if ($customer === null): ?>
                         <span><?= h(date('M j, Y', strtotime((string) $order['created_at']))) ?></span>
                         <span><?= h((int) $order['item_count']) ?> <?= (int) $order['item_count'] === 1 ? 'lovely thing' : 'lovely things' ?></span>
                         <strong><?= h(store_money((string) $order['total_amount'])) ?></strong>
-                        <a href="<?= h('/mini_ecommerce/index.php?page=orders&order=' . (int) $order['id']) ?>">See the details <span aria-hidden="true">→</span></a>
+                        <a href="<?= h('index.php?page=orders&order=' . (int) $order['id']) ?>">See the details <span aria-hidden="true">→</span></a>
                     </div>
                 </article>
             <?php endforeach; ?>

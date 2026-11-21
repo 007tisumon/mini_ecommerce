@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 
 if ($customer !== null) {
-    $signedInOrders = '/mini_ecommerce/index.php?page=orders';
+    $signedInOrders = 'index.php?page=orders';
     ?>
     <section class="auth-page">
         <div class="auth-card auth-success-card">
@@ -33,7 +33,7 @@ if ($customer !== null) {
             <span class="section-eyebrow">WELCOME BACK</span>
             <h1>Let’s pick up<br><em>where we left off.</em></h1>
             <p>Sign in to your Bloom Basket account.</p>
-            <form class="auth-form" action="<?= h('/mini_ecommerce/' . ltrim($loginAction, '/')) ?>" method="post">
+            <form class="auth-form" action="<?= h($loginAction) ?>" method="post">
                 <div class="checkout-field">
                     <label for="loginEmail">Email address</label>
                     <input id="loginEmail" type="email" name="email" maxlength="150"
@@ -49,8 +49,8 @@ if ($customer !== null) {
                 </div>
                 <button class="place-order-button" type="submit">Sign in <span aria-hidden="true">→</span></button>
             </form>
-            <div class="auth-switch">New around here? <a href="<?= h('/mini_ecommerce/' . ltrim($registerLink, '/')) ?>">Create your account</a></div>
-            <div class="auth-demo-note">Customer accounts only. <a href="<?= h('/mini_ecommerce/admin/login.php') ?>">Admin sign in →</a></div>
+            <div class="auth-switch">New around here? <a href="<?= h($registerLink) ?>">Create your account</a></div>
+            <div class="auth-demo-note">Customer accounts only. <a href="<?= h('admin/signin.php') ?>">Admin sign in →</a></div>
         </div>
     </section>
     <?php
