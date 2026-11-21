@@ -4,7 +4,8 @@ require "functions.php";
 
 role_check('admin');
 
-
+require '../database/config.php';
+$conn->set_charset('utf8mb4');
 
 require   'partials/head.php';
 require  'partials/left_bar.php';
