@@ -24,14 +24,11 @@
 <?php else: ?>
     <div class="checkout-layout">
         <form action="<?= h('index.php?page=checkout&action=checkout') ?>" method="post" class="checkout-form">
-<<<<<<< HEAD
             <?php if ($pageError !== ''): ?>
                 <div class="store-alert store-alert-warning" role="alert">
                     <span><?= h($pageError) ?></span>
                 </div>
             <?php endif; ?>
-=======
->>>>>>> 81168884d7d248b513d5e1dc3df1d88d75f20382
             <section class="checkout-section">
                 <div class="checkout-step"><span>01</span><div><h2>Where should we deliver?</h2><p>A real address helps your flowers find their way home.</p></div></div>
                 <div class="checkout-fields">
@@ -57,8 +54,16 @@
                     </div>
                     <div class="checkout-field">
                         <label for="deliveryCity">City</label>
-                        <input id="deliveryCity" name="city" type="text" maxlength="100"
-                               value="Dhaka" required autocomplete="address-level2">
+                        <select id="deliveryCity" name="city_id" data-subtotal="<?= h($cartSubtotal) ?>" required>
+                            <option value="">Choose your city</option>
+                            <?php foreach ($deliveryCities as $city): ?>
+                                <option value="<?= h((int) $city['id']) ?>"
+                                        data-charge="<?= h((float) $city['delivery_charge']) ?>"
+                                    <?= (int) $city['id'] === (int) $selectedDeliveryCityId ? 'selected' : '' ?>>
+                                    <?= h((string) $city['city_name']) ?> · <?= h(store_money((float) $city['delivery_charge'])) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="checkout-field">
                         <label for="deliveryPostal">Postal code <span>OPTIONAL</span></label>
@@ -68,6 +73,9 @@
                 </div>
             </section>
 
+            <?php if ($deliveryCities === []): ?>
+                <p class="store-alert store-alert-warning" role="alert">Delivery is not configured yet. Please contact the shop.</p>
+            <?php endif; ?>
             <section class="checkout-section">
                 <div class="checkout-step"><span>02</span><div><h2>How would you like to pay?</h2><p>Choose cash on delivery or secure bKash sandbox checkout.</p></div></div>
                 <?php if (bkash_credentials_missing() !== []): ?>
@@ -95,7 +103,7 @@
                     </label>
                 </div>
             </section>
-            <button class="place-order-button" type="submit">Place my flower order <span aria-hidden="true">→</span></button>
+            <button class="place-order-button" type="submit" <?= $deliveryCities === [] ? 'disabled' : '' ?>>Place my flower order <span aria-hidden="true">→</span></button>
             <p class="checkout-privacy-note"><span aria-hidden="true">♧</span> Your order details stay safe. We never ask for your payment PIN or OTP.</p>
         </form>
 
@@ -117,8 +125,8 @@
             </div>
             <div class="checkout-summary-totals">
                 <div class="summary-line"><span>Flowers</span><span><?= h(store_money($cartSubtotal)) ?></span></div>
-                <div class="summary-line"><span>Dhaka delivery</span><span><?= h(store_money($deliveryFee)) ?></span></div>
-                <div class="summary-total"><span>Total</span><strong><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
+                <div class="summary-line"><span>Delivery</span><span id="checkoutDeliveryFee"><?= h(store_money($deliveryFee)) ?></span></div>
+                <div class="summary-total"><span>Total</span><strong id="checkoutTotal"><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
             </div>
             <a class="checkout-edit-link" href="<?= h('index.php?page=cart') ?>">← Change something in my basket</a>
             <div class="checkout-mini-note"><span aria-hidden="true">✿</span> Arranged by hand, delivered with care.</div>

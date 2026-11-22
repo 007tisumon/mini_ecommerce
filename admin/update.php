@@ -24,6 +24,7 @@ $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
 $name = $getString('name');
 $description = $getString('description');
 $priceInput = $getString('price');
+$discountInput = $getString('discount_percent');
 $stockInput = $getString('stock');
 $slug = $getString('slug');
 $sku = $getString('sku');
@@ -33,6 +34,7 @@ $activeInput = $getString('active');
 
 $errors = [];
 $price = is_numeric($priceInput) ? (float) $priceInput : 0;
+$discountPercent = is_numeric($discountInput) ? (float) $discountInput : -1;
 $stock = filter_var($stockInput, FILTER_VALIDATE_INT);
 $categoryId = filter_var($categoryInput, FILTER_VALIDATE_INT);
 $featured = filter_var($featuredInput, FILTER_VALIDATE_INT);
@@ -51,6 +53,9 @@ if ($description === '') {
 }
 if (!is_numeric($priceInput) || $price <= 0 || $price > 99999999.99 || !is_finite($price)) {
     $errors[] = "Price must be greater than 0 and no more than 99,999,999.99.";
+}
+if (!is_numeric($discountInput) || !is_finite($discountPercent) || $discountPercent < 0 || $discountPercent > 100) {
+    $errors[] = "Discount must be a number from 0 to 100.";
 }
 if ($stock === false || $stock < 0) {
     $errors[] = "Stock must be a whole number that is 0 or greater.";
@@ -160,16 +165,17 @@ if ($errors) {
 if ($imagePath === null) {
     $statement = $conn->prepare(
         "UPDATE products
-         SET name = ?, description = ?, price = ?, stock = ?, slug = ?, sku = ?,
+         SET name = ?, description = ?, price = ?, discount_percent = ?, stock = ?, slug = ?, sku = ?,
              category_id = ?, is_featured = ?, is_active = ?
          WHERE id = ?"
     );
     if ($statement) {
         $statement->bind_param(
-            "ssdissiiii",
+            "ssddissiiii",
             $name,
             $description,
             $price,
+            $discountPercent,
             $stock,
             $slug,
             $sku,
@@ -182,16 +188,17 @@ if ($imagePath === null) {
 } else {
     $statement = $conn->prepare(
         "UPDATE products
-         SET name = ?, description = ?, price = ?, stock = ?, slug = ?, sku = ?,
+         SET name = ?, description = ?, price = ?, discount_percent = ?, stock = ?, slug = ?, sku = ?,
              category_id = ?, is_featured = ?, is_active = ?, image_path = ?
          WHERE id = ?"
     );
     if ($statement) {
         $statement->bind_param(
-            "ssdissiiisi",
+            "ssddissiiisi",
             $name,
             $description,
             $price,
+            $discountPercent,
             $stock,
             $slug,
             $sku,

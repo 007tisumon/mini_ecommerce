@@ -2,8 +2,6 @@
 
 
 
-const STORE_DELIVERY_FEE = 80;
-
 function store_redirect($path)
 {
     header('Location: ' . ltrim($path, '/'));
@@ -69,6 +67,14 @@ function store_money($amount)
     return '৳' . number_format((float) $amount, 2);
 }
 
+function store_discounted_price($product)
+{
+    $price = (float) ($product['price'] ?? 0);
+    $discount = max(0, min(100, (float) ($product['discount_percent'] ?? 0)));
+
+    return round($price * (1 - $discount / 100), 2);
+}
+
 function store_product_image($product)
 {
     $imagePath = str_replace('\\', '/', trim($product['image_path'] ?? ''));
@@ -123,7 +129,7 @@ function store_find_product_by_id($id)
 {
     $id = (int) $id;
     $result = database()->query(
-        "SELECT p.id, p.name, p.price, p.stock, p.is_active
+        "SELECT p.id, p.name, p.price, p.discount_percent, p.stock, p.is_active
          FROM products p
          JOIN categories c ON c.id = p.category_id
          WHERE p.id = $id AND p.is_active = 1 AND c.is_active = 1
@@ -161,9 +167,38 @@ function store_get_categories()
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
+function store_get_delivery_cities()
+{
+    $result = database()->query(
+        "SELECT id, city_name, delivery_charge
+         FROM delivery_cities
+         WHERE is_active = 1
+         ORDER BY city_name"
+    );
+
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function store_find_delivery_city($cityId)
+{
+    $cityId = (int) $cityId;
+    if ($cityId < 1) {
+        return null;
+    }
+
+    $result = database()->query(
+        "SELECT id, city_name, delivery_charge
+         FROM delivery_cities
+         WHERE id = $cityId AND is_active = 1
+         LIMIT 1"
+    );
+
+    return $result->fetch_assoc() ?: null;
+}
+
 function store_get_products($search = '', $category = '', $featured = false, $excludeSlug = null)
 {
-    $conditions = ['p.is_active = 1', 'c.is_active = 1', 'p.stock > 0'];
+    $conditions = ['p.is_active = 1', 'c.is_active = 1'];
 
     if ($search !== '') {
         $search = database()->real_escape_string($search);
@@ -220,7 +255,8 @@ function store_get_cart_items()
         }
 
         $product['quantity'] = $quantity;
-        $product['line_total'] = (float) $product['price'] * $quantity;
+        $product['discounted_price'] = store_discounted_price($product);
+        $product['line_total'] = $product['discounted_price'] * $quantity;
         $items[] = $product;
     }
 
@@ -464,7 +500,7 @@ function store_cancel_unpaid_order(int $orderId): void
     }
 }
 
-function store_place_order($customerId, $recipient, $phone, $address, $area, $city, $postalCode, $paymentMethod, $paymentStatus = 'success')
+function store_place_order($customerId, $recipient, $phone, $address, $area, $city, $postalCode, $paymentMethod, $deliveryFee, $paymentStatus = 'success')
 {
     $cart = store_cart();
     if (!$cart) {
@@ -485,10 +521,13 @@ function store_place_order($customerId, $recipient, $phone, $address, $area, $ci
             }
 
             $products[$productId] = $product;
-            $subtotal += (float) $product['price'] * $quantity;
+            $subtotal += store_discounted_price($product) * $quantity;
         }
 
-        $deliveryFee = STORE_DELIVERY_FEE;
+        $deliveryFee = (float) $deliveryFee;
+        if (!is_finite($deliveryFee) || $deliveryFee < 0) {
+            throw new InvalidArgumentException('Choose a valid delivery city.');
+        }
         $total = $subtotal + $deliveryFee;
         $orderNumber = 'BB-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
         $customerId = (int) $customerId;
@@ -523,8 +562,9 @@ function store_place_order($customerId, $recipient, $phone, $address, $area, $ci
             }
 
             $productName = $connection->real_escape_string($product['name']);
-            $unitPrice = number_format((float) $product['price'], 2, '.', '');
-            $lineTotal = number_format((float) $product['price'] * $quantity, 2, '.', '');
+            $discountedPrice = store_discounted_price($product);
+            $unitPrice = number_format($discountedPrice, 2, '.', '');
+            $lineTotal = number_format($discountedPrice * $quantity, 2, '.', '');
             $connection->query(
                 "INSERT INTO order_items (order_id, product_id, product_name, unit_price, quantity, line_total)
                  VALUES ($orderId, $productId, '$productName', $unitPrice, $quantity, $lineTotal)"

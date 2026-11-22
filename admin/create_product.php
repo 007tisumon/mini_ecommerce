@@ -69,6 +69,10 @@ require  'partials/header.php';
                                             <input name="price" type="number" min="0.01" step="0.01" class="form-control" id="inputPrice" placeholder="Price" required>
                                         </div>
                                         <div class="col-md-6">
+                                            <label for="inputDiscount" class="form-label">Discount (%)</label>
+                                            <input name="discount_percent" type="number" min="0" max="100" step="0.01" value="0" class="form-control" id="inputDiscount" required>
+                                        </div>
+                                        <div class="col-md-6">
                                             <label for="inputCompareatprice" class="form-label">Stock</label>
                                             <input name="stock" type="number" min="0" step="1" class="form-control" id="inputCompareatprice" placeholder="Stock" required>
                                         </div>
@@ -93,6 +97,7 @@ require  'partials/header.php';
                                                     </option>
                                                 <?php } ?>
                                             </select>
+                                            <a href="add_category.php" class="small d-inline-block mt-2">Add a category</a>
                                         </div>
                                         <div class="col-12">
                                             <label for="inputVendor" class="form-label">Featured</label>

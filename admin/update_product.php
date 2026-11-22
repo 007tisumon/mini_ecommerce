@@ -96,6 +96,12 @@ require 'partials/header.php';
                                                 value="<?php echo $product['price']; ?>" required>
                                         </div>
                                         <div class="col-md-6">
+                                            <label for="product-discount" class="form-label">Discount (%)</label>
+                                            <input name="discount_percent" type="number" min="0" max="100" step="0.01"
+                                                class="form-control" id="product-discount"
+                                                value="<?php echo htmlspecialchars((string) ($product['discount_percent'] ?? 0), ENT_QUOTES, 'UTF-8'); ?>" required>
+                                        </div>
+                                        <div class="col-md-6">
                                             <label for="product-stock" class="form-label">Stock</label>
                                             <input name="stock" type="number" min="0" step="1"
                                                 class="form-control" id="product-stock"

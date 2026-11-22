@@ -2224,6 +2224,18 @@ a.sidebar-link:hover {
     letter-spacing: 0.85px;
 }
 
+.product-discount-badge {
+    position: absolute;
+    z-index: 1;
+    top: 11px;
+    right: 11px;
+    padding: 6px 8px;
+    color: #fff;
+    background: #ad5144;
+    font-size: 8px;
+    font-weight: 700;
+}
+
 .product-quick-view {
     position: absolute;
     z-index: 2;
@@ -2299,6 +2311,22 @@ a.sidebar-link:hover {
     color: #536246;
     font-size: 10px;
     font-weight: 650;
+}
+
+.product-price del,
+.detail-product-price del,
+.cart-item-price del {
+    margin-right: 4px;
+    color: #969b91;
+    font-size: 0.85em;
+    font-weight: 400;
+}
+
+.product-discount-label {
+    margin-left: 5px;
+    color: #a64b40;
+    font-size: 0.7em;
+    vertical-align: middle;
 }
 
 .product-card-bottom {
@@ -2687,6 +2715,13 @@ a.sidebar-link:hover {
 .detail-add-form .hero-shop-button {
     flex: 1;
     margin-top: 0;
+}
+
+.detail-add-form .hero-shop-button:disabled {
+    border-color: #e4e3da;
+    color: #899087;
+    background: #f2f1e8;
+    cursor: not-allowed;
 }
 
 .detail-promises {
@@ -3156,6 +3191,7 @@ a.sidebar-link:hover {
 }
 
 .checkout-field input,
+.checkout-field select,
 .simulated-payment-choice input,
 .simulated-payment-choice select {
     width: 100%;
@@ -3170,6 +3206,7 @@ a.sidebar-link:hover {
 }
 
 .checkout-field input:focus,
+.checkout-field select:focus,
 .simulated-payment-choice input:focus,
 .simulated-payment-choice select:focus {
     border-color: #92ae8d;

@@ -35,6 +35,7 @@ if (!$conn) {
 $name = trim($_POST['name'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $price_input = trim($_POST['price'] ?? '');
+$discount_input = trim($_POST['discount_percent'] ?? '0');
 $stock_input = $_POST['stock'] ?? '';
 $slug = trim($_POST['slug'] ?? '');
 $sku = trim($_POST['sku'] ?? '');
@@ -51,6 +52,10 @@ if ($description === '') {
 }
 if (!is_numeric($price_input) || (float) $price_input <= 0 || !is_finite((float) $price_input)) {
     $errors[] = 'Price must be a valid number greater than 0.';
+}
+if (!is_numeric($discount_input) || !is_finite((float) $discount_input)
+    || (float) $discount_input < 0 || (float) $discount_input > 100) {
+    $errors[] = 'Discount must be a number from 0 to 100.';
 }
 
 $stock = filter_var($stock_input, FILTER_VALIDATE_INT);
@@ -153,11 +158,12 @@ if ($errors) {
 }
 
 $price = (float) $price_input;
+$discount_percent = (float) $discount_input;
 $insert = false;
 try {
     $insert = $conn->prepare(
-        'INSERT INTO products (name, description, price, stock, slug, sku, category_id, is_featured, is_active, image_path)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO products (name, description, price, discount_percent, stock, slug, sku, category_id, is_featured, is_active, image_path)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
 } catch (mysqli_sql_exception $exception) {
     if ($image_path !== null) {
@@ -175,10 +181,11 @@ if (!$insert) {
 }
 
 $insert->bind_param(
-    'ssdissiiis',
+    'ssddissiiis',
     $name,
     $description,
     $price,
+    $discount_percent,
     $stock,
     $slug,
     $sku,

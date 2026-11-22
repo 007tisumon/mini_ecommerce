@@ -182,7 +182,7 @@ Open the local domain configured in your development environment.
 
 ## Admin Sign-in
 
-The admin area uses the `users` table from `bloom_basket_database.sql`. Import the SQL file, configure the database connection with the `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` environment variables, then set a real password for the seeded administrator from a terminal:
+The admin area uses the `users` table from `bloom_basket.sql`. Import the SQL file, configure the database connection with the `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` environment variables, then set a real password for the seeded administrator from a terminal:
 
 ```bash
 php scripts/set_admin_password.php admin@bloombasket.com

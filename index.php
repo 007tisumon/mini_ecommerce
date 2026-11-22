@@ -20,6 +20,7 @@ if (!in_array($page, $allowedPages, true)) {
 $flash = $_SESSION['_store_flash'] ?? null;
 unset($_SESSION['_store_flash']);
 $pageError = '';
+$selectedDeliveryCityId = 0;
 
 if ($action === 'bkash-callback') {
     $status = strtolower(trim((string) ($_GET['status'] ?? '')));
@@ -165,6 +166,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['store_cart'] = $cart;
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') {
+            $updatedItems = store_get_cart_items();
+            $responseItems = [];
+            foreach ($updatedItems as $item) {
+                $responseItems[] = [
+                    'id' => (int) $item['id'],
+                    'quantity' => (int) $item['quantity'],
+                    'unit_price' => (float) $item['discounted_price'],
+                    'line_total' => (float) $item['line_total'],
+                ];
+            }
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'items' => $responseItems,
+                'subtotal' => store_cart_subtotal($updatedItems),
+            ]);
+            exit;
+        }
         $_SESSION['_store_flash'] = ['type' => 'success', 'message' => 'Your basket has been updated.'];
         store_redirect('index.php?page=cart');
     } elseif ($action === 'register') {
@@ -243,7 +263,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $phone = trim((string) ($_POST['phone'] ?? ''));
         $address = trim((string) ($_POST['shipping_address'] ?? ''));
         $area = trim((string) ($_POST['area'] ?? ''));
-        $city = trim((string) ($_POST['city'] ?? ''));
+        $selectedDeliveryCityId = filter_var($_POST['city_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($selectedDeliveryCityId === false || $selectedDeliveryCityId === null) {
+            $selectedDeliveryCityId = 0;
+        }
+        $deliveryCity = $selectedDeliveryCityId !== false && $selectedDeliveryCityId !== null
+            ? store_find_delivery_city($selectedDeliveryCityId)
+            : null;
+        $city = is_array($deliveryCity) ? (string) $deliveryCity['city_name'] : '';
+        $deliveryFee = is_array($deliveryCity) ? (float) $deliveryCity['delivery_charge'] : 0.0;
         $postalCode = trim((string) ($_POST['postal_code'] ?? ''));
         $paymentMethod = (string) ($_POST['payment_method'] ?? '');
 
@@ -253,8 +281,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pageError = 'Enter a valid contact phone number.';
         } elseif ($address === '' || strlen($address) > 255) {
             $pageError = 'Enter a delivery address (up to 255 characters).';
-        } elseif (strlen($area) > 100 || $city === '' || strlen($city) > 100 || strlen($postalCode) > 20) {
-            $pageError = 'Check the area, city, and postal code fields.';
+        } elseif (strlen($area) > 100 || strlen($postalCode) > 20) {
+            $pageError = 'Check the area and postal code fields.';
+        } elseif (!is_array($deliveryCity)) {
+            $pageError = 'Choose a city where we deliver.';
         } elseif (!in_array($paymentMethod, ['cod', 'bkash'], true)) {
             $pageError = 'Choose one of the available payment methods.';
         } else {
@@ -278,6 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $city,
                     $postalCode,
                     $paymentMethod,
+                    $deliveryFee,
                     'pending'
                 );
 
@@ -320,6 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $customer = store_customer();
 $cartCount = store_cart_count();
 $cartItems = [];
+$deliveryCities = [];
 $categories = [];
 $products = [];
 $selectedProduct = null;
@@ -346,6 +378,12 @@ if (in_array($page, ['home', 'cart', 'checkout', 'orders'], true)) {
 
         if ($page === 'cart' || $page === 'checkout') {
             $cartItems = store_get_cart_items();
+        }
+        if ($page === 'checkout' && $cartItems !== []) {
+            $deliveryCities = store_get_delivery_cities();
+            if ($selectedDeliveryCityId === 0 && $deliveryCities !== []) {
+                $selectedDeliveryCityId = (int) $deliveryCities[0]['id'];
+            }
         }
 
         if ($page === 'orders' && store_customer_is_signed_in()) {
@@ -380,7 +418,16 @@ $pageTitle = $pageTitles[$page] ?? $pageTitles['home'];
 $query = trim((string) ($_GET['q'] ?? ''));
 $selectedCategory = trim((string) ($_GET['category'] ?? ''));
 $cartSubtotal = store_cart_subtotal($cartItems);
-$deliveryFee = $cartItems === [] ? 0.0 : STORE_DELIVERY_FEE;
+$selectedDeliveryCity = null;
+foreach ($deliveryCities as $deliveryCity) {
+    if ((int) $deliveryCity['id'] === (int) $selectedDeliveryCityId) {
+        $selectedDeliveryCity = $deliveryCity;
+        break;
+    }
+}
+$deliveryFee = $page === 'checkout' && is_array($selectedDeliveryCity)
+    ? (float) $selectedDeliveryCity['delivery_charge']
+    : 0.0;
 
 require 'shop/partials/header.php';
 ?>

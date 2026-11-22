@@ -3,6 +3,7 @@ session_start();
 require "functions.php";
 role_check('admin');
 require "../database/config.php";
+require_once "../includes/store.php";
 require "partials/head.php";
 require "partials/left_bar.php";
 require "partials/header.php";
@@ -93,15 +94,21 @@ require "partials/header.php";
                         <div class="card">
                             <img src="<?php echo isset($product['image_path']) ? $product['image_path'] : 'assets/images/products/flower.webp' ?>" class="card-img-top" alt="...">
                             <div class="">
-                                <div class="position-absolute top-0 end-0 m-3 product-discount"><span class="">-10%</span></div>
+                                <?php if ((float) ($product['discount_percent'] ?? 0) > 0) { ?>
+                                    <div class="position-absolute top-0 end-0 m-3 product-discount">
+                                        <span>-<?php echo rtrim(rtrim(number_format((float) $product['discount_percent'], 2), '0'), '.'); ?>%</span>
+                                    </div>
+                                <?php } ?>
                             </div>
                             <div class="card-body">
                                 <h6 class="card-title cursor-pointer"><?php echo $product['name'] ?></h6>
                                 <div class="clearfix">
                                     <p class="mb-0 float-start"><strong>134</strong> Sales</p>
                                     <p class="mb-0 float-end fw-bold">
-                                        <!-- <span class="me-2 text-decoration-line-through">$350</span> -->
-                                        <span class="text-white">tk <?php echo $product['price'] ?></span>
+                                        <?php if ((float) ($product['discount_percent'] ?? 0) > 0) { ?>
+                                            <span class="me-2 text-decoration-line-through">৳<?php echo number_format((float) $product['price'], 2); ?></span>
+                                        <?php } ?>
+                                        <span class="text-white">৳<?php echo number_format(store_discounted_price($product), 2); ?></span>
                                     </p>
                                 </div>
                                 <div class="d-flex align-items-center mt-3 fs-6">

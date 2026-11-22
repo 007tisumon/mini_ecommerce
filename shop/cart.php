@@ -17,9 +17,10 @@ declare(strict_types=1);
     <div class="cart-layout">
         <section class="cart-items-panel" aria-label="Basket items">
             <div class="cart-panel-title"><span>YOUR FLOWERS</span><span><?= count($cartItems) ?> <?= count($cartItems) === 1 ? 'arrangement' : 'arrangements' ?></span></div>
-            <form action="<?= h('index.php?page=cart&action=cart-update') ?>" method="post">
+            <div id="cart-update-message" class="store-alert store-alert-warning d-none" role="alert"></div>
+            <form action="<?= h('index.php?page=cart&action=cart-update') ?>" method="post" data-cart-form>
                 <?php foreach ($cartItems as $item): ?>
-                    <article class="cart-item">
+                    <article class="cart-item" data-cart-item="<?= h((int) $item['id']) ?>">
                         <a class="cart-item-image" href="<?= h('index.php?product=' . rawurlencode((string) $item['slug'])) ?>">
                             <img src="<?= h(store_product_image($item)) ?>" alt=""
                                  data-fallback-src="<?= h('assets/images/flower-placeholder.svg') ?>"
@@ -28,7 +29,13 @@ declare(strict_types=1);
                         <div class="cart-item-copy">
                             <span class="product-category"><?= h((string) $item['category_name']) ?></span>
                             <h2><a href="<?= h('index.php?product=' . rawurlencode((string) $item['slug'])) ?>"><?= h((string) $item['name']) ?></a></h2>
-                            <span class="cart-item-price"><?= h(store_money((string) $item['price'])) ?></span>
+                            <span class="cart-item-price">
+                                <?php if ((float) $item['discount_percent'] > 0): ?>
+                                    <del><?= h(store_money((string) $item['price'])) ?></del>
+                                    <span>-<?= h(rtrim(rtrim(number_format((float) $item['discount_percent'], 2), '0'), '.')) ?>%</span>
+                                <?php endif; ?>
+                                <?= h(store_money((float) $item['discounted_price'])) ?> each
+                            </span>
                             <button class="remove-item" type="submit" name="remove_product_id" value="<?= h((int) $item['id']) ?>">Remove</button>
                         </div>
                         <div class="cart-item-quantity">
@@ -36,14 +43,14 @@ declare(strict_types=1);
                             <input id="quantity-<?= h((int) $item['id']) ?>" type="number"
                                    name="quantity[<?= h((int) $item['id']) ?>]"
                                    value="<?= h((int) $item['quantity']) ?>" min="0"
+                                   data-unit-price="<?= h((float) $item['discounted_price']) ?>"
                                    max="<?= h(min((int) $item['stock'], 20)) ?>">
                         </div>
-                        <strong class="cart-line-total"><?= h(store_money((float) $item['line_total'])) ?></strong>
+                        <strong class="cart-line-total" data-line-total><?= h(store_money((float) $item['line_total'])) ?></strong>
                     </article>
                 <?php endforeach; ?>
                 <div class="cart-update-row">
                     <a class="text-link" href="<?= h('index.php#shop') ?>">← Keep exploring</a>
-                    <button class="cart-update-button" type="submit">Update basket</button>
                 </div>
             </form>
         </section>
@@ -51,9 +58,9 @@ declare(strict_types=1);
             <span class="summary-eyebrow">THE LITTLE DETAILS</span>
             <h2>Your order, so far.</h2>
             <div class="summary-line"><span>Flowers</span><span><?= h(store_money($cartSubtotal)) ?></span></div>
-            <div class="summary-line"><span>Dhaka delivery</span><span><?= h(store_money($deliveryFee)) ?></span></div>
-            <div class="summary-total"><span>Total</span><strong><?= h(store_money($cartSubtotal + $deliveryFee)) ?></strong></div>
-            <p class="summary-small-note">Final total includes delivery, so there are no surprises at the door.</p>
+            <div class="summary-line"><span>Delivery</span><span>Calculated at checkout</span></div>
+            <div class="summary-total"><span>Flowers total</span><strong data-cart-subtotal><?= h(store_money($cartSubtotal)) ?></strong></div>
+            <p class="summary-small-note">Choose your city at checkout to see the delivery charge and final total.</p>
             <a class="checkout-button" href="<?= h('index.php?page=checkout') ?>">A little something, on its way <span aria-hidden="true">→</span></a>
             <div class="summary-secure"><span>✿</span> Thoughtfully packaged, always.</div>
             <div class="summary-payments">

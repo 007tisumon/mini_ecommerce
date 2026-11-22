@@ -81,6 +81,22 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `is_active`, `cre
 (5, 'Gift Flowers', 'gift-flowers', 'Special flower gifts for loved ones.', 1, '2026-11-04 14:23:59');
 
 -- --------------------------------------------------------
+-- Table structure for table `delivery_cities`
+-- --------------------------------------------------------
+
+CREATE TABLE `delivery_cities` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `city_name` varchar(100) NOT NULL,
+  `delivery_charge` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `delivery_cities` (`id`, `city_name`, `delivery_charge`, `is_active`) VALUES
+(1, 'Dhaka', 80.00, 1);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `orders`
@@ -209,6 +225,7 @@ CREATE TABLE `products` (
   `slug` varchar(170) NOT NULL,
   `description` text DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
+  `discount_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
   `stock` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `image_path` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
@@ -221,19 +238,19 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `category_id`, `sku`, `name`, `slug`, `description`, `price`, `stock`, `image_path`, `is_active`, `is_featured`, `created_at`, `updated_at`) VALUES
-(1, 1, 'ROS-001', 'Red Rose', 'red-rose', 'Beautiful fresh red rose.', 150.00, 100, 'products/red-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(2, 1, 'ROS-002', 'White Rose', 'white-rose', 'Elegant white rose.', 160.00, 80, 'products/white-rose.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(3, 1, 'ROS-003', 'Pink Rose', 'pink-rose', 'Lovely pink rose.', 170.00, 70, 'products/pink-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(4, 2, 'BOU-001', 'Romantic Rose Bouquet', 'romantic-rose-bouquet', 'A romantic bouquet of fresh roses.', 1200.00, 25, 'products/romantic-bouquet.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(5, 2, 'BOU-002', 'Mixed Flower Bouquet', 'mixed-flower-bouquet', 'Colorful mixed flower bouquet.', 1500.00, 20, 'products/mixed-bouquet.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(6, 2, 'BOU-003', 'Premium Flower Bouquet', 'premium-flower-bouquet', 'Premium collection of fresh flowers.', 2200.00, 15, 'products/premium-bouquet.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(7, 3, 'WED-001', 'Wedding Rose Set', 'wedding-rose-set', 'Beautiful roses for wedding decoration.', 5000.00, 10, 'products/wedding-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(8, 3, 'WED-002', 'Wedding Flower Garland', 'wedding-flower-garland', 'Traditional flower garland.', 1800.00, 30, 'products/wedding-garland.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(9, 4, 'PLT-001', 'Peace Lily', 'peace-lily', 'Beautiful indoor peace lily plant.', 850.00, 35, 'products/peace-lily.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(10, 4, 'PLT-002', 'Snake Plant', 'snake-plant', 'Low maintenance indoor plant.', 650.00, 40, 'products/snake-plant.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(11, 5, 'GFT-001', 'Birthday Flower Box', 'birthday-flower-box', 'Special flower box for birthdays.', 1800.00, 20, 'products/birthday-box.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
-(12, 5, 'GFT-002', 'Anniversary Flower Box', 'anniversary-flower-box', 'Beautiful anniversary flower gift.', 2500.00, 12, 'products/anniversary-box.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59');
+INSERT INTO `products` (`id`, `category_id`, `sku`, `name`, `slug`, `description`, `price`, `discount_percent`, `stock`, `image_path`, `is_active`, `is_featured`, `created_at`, `updated_at`) VALUES
+(1, 1, 'ROS-001', 'Red Rose', 'red-rose', 'Beautiful fresh red rose.', 150.00, 0.00, 100, 'products/red-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(2, 1, 'ROS-002', 'White Rose', 'white-rose', 'Elegant white rose.', 160.00, 0.00, 80, 'products/white-rose.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(3, 1, 'ROS-003', 'Pink Rose', 'pink-rose', 'Lovely pink rose.', 170.00, 0.00, 70, 'products/pink-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(4, 2, 'BOU-001', 'Romantic Rose Bouquet', 'romantic-rose-bouquet', 'A romantic bouquet of fresh roses.', 1200.00, 0.00, 25, 'products/romantic-bouquet.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(5, 2, 'BOU-002', 'Mixed Flower Bouquet', 'mixed-flower-bouquet', 'Colorful mixed flower bouquet.', 1500.00, 0.00, 20, 'products/mixed-bouquet.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(6, 2, 'BOU-003', 'Premium Flower Bouquet', 'premium-flower-bouquet', 'Premium collection of fresh flowers.', 2200.00, 0.00, 15, 'products/premium-bouquet.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(7, 3, 'WED-001', 'Wedding Rose Set', 'wedding-rose-set', 'Beautiful roses for wedding decoration.', 5000.00, 0.00, 10, 'products/wedding-rose.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(8, 3, 'WED-002', 'Wedding Flower Garland', 'wedding-flower-garland', 'Traditional flower garland.', 1800.00, 0.00, 30, 'products/wedding-garland.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(9, 4, 'PLT-001', 'Peace Lily', 'peace-lily', 'Beautiful indoor peace lily plant.', 850.00, 0.00, 35, 'products/peace-lily.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(10, 4, 'PLT-002', 'Snake Plant', 'snake-plant', 'Low maintenance indoor plant.', 650.00, 0.00, 40, 'products/snake-plant.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(11, 5, 'GFT-001', 'Birthday Flower Box', 'birthday-flower-box', 'Special flower box for birthdays.', 1800.00, 0.00, 20, 'products/birthday-box.jpg', 1, 1, '2026-11-04 14:23:59', '2026-11-04 14:23:59'),
+(12, 5, 'GFT-002', 'Anniversary Flower Box', 'anniversary-flower-box', 'Beautiful anniversary flower gift.', 2500.00, 0.00, 12, 'products/anniversary-box.jpg', 1, 0, '2026-11-04 14:23:59', '2026-11-04 14:23:59');
 
 -- --------------------------------------------------------
 
@@ -280,6 +297,13 @@ ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`),
   ADD UNIQUE KEY `slug` (`slug`);
+
+--
+-- Indexes for table `delivery_cities`
+--
+ALTER TABLE `delivery_cities`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_delivery_cities_name` (`city_name`);
 
 --
 -- Indexes for table `orders`
@@ -349,6 +373,12 @@ ALTER TABLE `addresses`
 --
 ALTER TABLE `categories`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `delivery_cities`
+--
+ALTER TABLE `delivery_cities`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `orders`

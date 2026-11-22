@@ -353,6 +353,7 @@ require 'partials/header.php';
                     </ul>
                 </div>
                 <div class="modal-footer">
+                    <a class="btn btn-light" href="invoice.php?id=<?= (int) $selectedOrder['id'] ?>" target="_blank" rel="noopener">Print invoice</a>
                     <a class="btn btn-light" href="orders.php?<?= order_e(http_build_query(['q' => $search, 'status' => $statusFilter])) ?>">Back to orders</a>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
